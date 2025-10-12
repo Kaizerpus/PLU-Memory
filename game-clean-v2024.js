@@ -3457,21 +3457,20 @@ function showMenu() {
     showSection('menuButtons');
     hideSection('gameModeSection');
     hideSection('filterSection');
+}
+
+function showGameModeFromMenu() {
+    console.log('Visar spellägesval från meny');
     
-    // Visa gamemode direkt om användaren är inloggad
-    if (window.firebaseManager?.currentUser) {
-        // Inloggad användare - visa gamemode-valet direkt
-        showSection('gameModeSection');
-        hideSection('menuButtons');
-    }
+    hideSection('menuButtons');
+    showSection('gameModeSection');
+    hideSection('filterSection');
 }
 
 function showGameModeSelection() {
     console.log('Visar spellägesval');
     
-    hideSection('menuButtons');
-    showSection('gameModeSection');
-    hideSection('filterSection');
+    showGameModeFromMenu();
 }
 
 function showFilterSection(gameMode) {
@@ -4061,12 +4060,14 @@ function setupMenuButtons() {
     const reverseModeBtn = document.getElementById('reverseModeBtn');
     const practiceModeBtn = document.getElementById('practiceModeBtn');
     const backToMenuFromGameModeBtn = document.getElementById('backToMenuFromGameMode');
+    const backToMenuFromGameModeTopBtn = document.getElementById('backToMenuFromGameModeTop');
     
     if (classicModeBtn) addClickSound(classicModeBtn, () => showFilterSection('classic'));
     if (timeModeBtn) addClickSound(timeModeBtn, () => showFilterSection('time'));
     if (reverseModeBtn) addClickSound(reverseModeBtn, () => showFilterSection('reverse'));
     if (practiceModeBtn) addClickSound(practiceModeBtn, () => showFilterSection('practice'));
     if (backToMenuFromGameModeBtn) addClickSound(backToMenuFromGameModeBtn, showMenu);
+    if (backToMenuFromGameModeTopBtn) addClickSound(backToMenuFromGameModeTopBtn, showMenu);
     
     // Filter section buttons
     const backToGameModeFromFilterBtn = document.getElementById('backToGameModeFromFilter');

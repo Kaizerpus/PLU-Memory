@@ -279,12 +279,6 @@
                  aria-labelledby="profile-title"
                  aria-describedby="profile-description">
                 
-                <!-- Auth Buttons (visible when not logged in) -->
-                <div id="authButtons" class="auth-buttons">
-                    <button id="loginButton" class="auth-btn primary">📋 Logga in</button>
-                    <button id="registerButton" class="auth-btn success">📝 Skapa konto</button>
-                </div>
-                
                 <div id="playerStats" role="region" aria-labelledby="player-stats-heading"></div>
                 <h4 id="player-stats-heading" class="sr-only" aria-level="4">Spelarstatistik</h4>
                 
@@ -587,7 +581,7 @@
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toastContainer"></div>
     
-    <script src="game-clean-v2024.js?v=20251012-31"></script>
+    <script src="game-clean-v2024.js?v=20251012-37"></script>
     <script>
         // Register Service Worker for offline support
         if ('serviceWorker' in navigator) {
@@ -627,14 +621,16 @@
     </script>
     
     <!-- Firebase Configuration -->
-    <script src="firebase-config.js?v=20251012-36"></script>
+    <script src="firebase-config.js?v=20251012-37"></script>
     
     <!-- Firebase Initialization -->
     <script>
         // Initiera Firebase när sidan laddas
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 DOMContentLoaded event fired');
+            
             if (window.FirebaseManager) {
-                console.log('🔥 Startar Firebase initialisering...');
+                console.log('🔥 FirebaseManager found, starting initialization...');
                 window.firebaseManager = new FirebaseManager();
                 const success = await window.firebaseManager.initialize();
                 if (success) {
@@ -645,10 +641,13 @@
                 
                 // Setup auth buttons efter Firebase är initialiserat
                 if (window.setupAuthButtons) {
+                    console.log('🔗 Found setupAuthButtons, calling it...');
                     window.setupAuthButtons();
                 } else {
                     console.log('⚠️ setupAuthButtons function not found');
                 }
+            } else {
+                console.log('❌ FirebaseManager not found!');
             }
         });
     </script>

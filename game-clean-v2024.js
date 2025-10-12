@@ -3845,6 +3845,14 @@ function showProfile() {
         playerStats.innerHTML = userInfoHtml;
         if (profileStats) profileStats.innerHTML = statsHtml;
         
+        // Setup auth buttons after content is loaded
+        setTimeout(() => {
+            if (window.setupAuthButtons) {
+                console.log('🔄 Setting up auth buttons after profile content loaded');
+                window.setupAuthButtons();
+            }
+        }, 100);
+        
     } else {
         // Fallback om managers inte finns
         if (playerStats) {

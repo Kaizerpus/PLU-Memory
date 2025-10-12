@@ -3501,8 +3501,11 @@ function showLeaderboard() {
         leaderboardList.innerHTML = '<p>⏳ Laddar global topplista...</p>';
         
         if (window.firebaseManager && window.firebaseManager.isInitialized) {
+            console.log('🔍 Begär global topplista från Firebase...');
             // Hämta global topplista från Firebase
             window.firebaseManager.getLeaderboard(10).then(globalScores => {
+                console.log('📊 Mottagna topplista resultat:', globalScores);
+                
                 if (globalScores.length === 0) {
                     leaderboardList.innerHTML = '<p>🏆 Inga resultat än. Bli först på topplistan!</p>';
                 } else {

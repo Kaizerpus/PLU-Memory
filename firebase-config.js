@@ -286,12 +286,15 @@ class FirebaseManager {
 
     async saveUserData(userData) {
         if (!this.isInitialized || !currentUser) {
+            console.log('🚫 Kan inte spara - Firebase inte initialiserat eller användare inte inloggad');
             // Spara lokalt om offline eller inte inloggad
             this.saveLocalBackup(userData);
             return;
         }
 
         try {
+            console.log('💾 Sparar användardata till Firebase:', userData);
+            
             const userDoc = db.collection('users').doc(currentUser.uid);
             const saveData = {
                 ...userData,
@@ -302,8 +305,15 @@ class FirebaseManager {
 
             if (this.isOnline) {
                 await userDoc.set(saveData, { merge: true });
-                console.log('💾 Data sparad till Firebase');
+                console.log('✅ Data sparad till Firebase framgångsrikt');
+                
+                // Verifiera att datan sparades
+                const doc = await userDoc.get();
+                if (doc.exists) {
+                    console.log('🔍 Verifierad sparad data:', doc.data());
+                }
             } else {
+                console.log('📡 Offline - lägger till i kö för senare synk');
                 // Lägg till i kö för senare synk
                 this.pendingWrites.push({ doc: userDoc, data: saveData });
                 this.saveLocalBackup(userData);
@@ -540,25 +550,59 @@ class FirebaseManager {
 
     // Leaderboard funktioner
     async getLeaderboard(limit = 10) {
-        if (!this.isInitialized) return [];
+        if (!this.isInitialized) {
+            console.log('🚫 Firebase inte initialiserat för leaderboard');
+            return [];
+        }
 
         try {
+            console.log('🔍 Hämtar leaderboard från Firebase...');
+            
             const snapshot = await db.collection('users')
                 .where('gameData.totalGamesPlayed', '>', 0) // Endast användare som spelat minst 1 spel
                 .orderBy('gameData.bestScore', 'desc')
                 .limit(limit)
                 .get();
 
-            return snapshot.docs.map(doc => ({
-                id: doc.id,
-                displayName: doc.data().displayName,
-                bestScore: doc.data().gameData?.bestScore || 0,
-                totalGamesPlayed: doc.data().gameData?.totalGamesPlayed || 0,
-                bestScoreDetails: doc.data().gameData?.bestScoreDetails || null // För att visa produkter/kategori
-            })).filter(user => user.bestScore > 0); // Extra säkerhet - bara användare med poäng > 0
+            console.log('📊 Firebase query result:', {
+                size: snapshot.size,
+                docs: snapshot.docs.length
+            });
+
+            const results = snapshot.docs.map(doc => {
+                const data = doc.data();
+                console.log('👤 User data:', {
+                    id: doc.id,
+                    displayName: data.displayName,
+                    bestScore: data.gameData?.bestScore,
+                    totalGamesPlayed: data.gameData?.totalGamesPlayed
+                });
+                
+                return {
+                    id: doc.id,
+                    displayName: data.displayName,
+                    bestScore: data.gameData?.bestScore || 0,
+                    totalGamesPlayed: data.gameData?.totalGamesPlayed || 0,
+                    bestScoreDetails: data.gameData?.bestScoreDetails || null
+                };
+            }).filter(user => {
+                const isValid = user.bestScore > 0;
+                if (!isValid) {
+                    console.log('🚫 Filtrerar bort användare med 0 poäng:', user);
+                }
+                return isValid;
+            });
+
+            console.log('✅ Slutgiltiga leaderboard resultat:', results);
+            return results;
             
         } catch (error) {
             console.error('❌ Kunde inte ladda leaderboard:', error);
+            console.error('Error details:', {
+                code: error.code,
+                message: error.message,
+                stack: error.stack
+            });
             return [];
         }
     }

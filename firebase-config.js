@@ -644,45 +644,67 @@ class FirebaseManager {
         if (!this.isInitialized || !this.isModerator) return [];
 
         try {
-            const usersSnapshot = await db.collection('users').get();
+            // Hämta bara rolldata - inte användardata från users-kollektionen
+            // eftersom säkerhetsreglerna blockerar det
             const rolesSnapshot = await db.collection('userRoles').get();
+            const authUsersSnapshot = await db.collection('users').get();
             
-            const users = {};
-            const roles = {};
+            const allUsers = [];
             
-            // Samla användardata
-            usersSnapshot.docs.forEach(doc => {
-                const data = doc.data();
-                users[doc.id] = {
-                    uid: doc.id,
-                    displayName: data.displayName,
-                    email: data.email,
-                    lastActive: data.lastUpdated,
-                    gameStats: data.gameData
-                };
+            // Kombinera data från båda kollektionerna
+            rolesSnapshot.docs.forEach(roleDoc => {
+                const roleData = roleDoc.data();
+                const userId = roleDoc.id;
+                
+                // Hitta motsvarande användardata
+                const userDoc = authUsersSnapshot.docs.find(doc => doc.id === userId);
+                const userData = userDoc ? userDoc.data() : {};
+                
+                allUsers.push({
+                    uid: userId,
+                    displayName: userData.displayName || roleData.setByName || 'Okänd användare',
+                    email: userData.email || 'Ingen e-post',
+                    lastActive: userData.lastUpdated || roleData.setAt,
+                    gameStats: userData.gameData || {},
+                    role: roleData.role || 'user',
+                    isCurrentUser: userId === currentUser.uid,
+                    photoURL: userData.photoURL || null
+                });
             });
             
-            // Samla rolldata
-            rolesSnapshot.docs.forEach(doc => {
-                roles[doc.id] = doc.data();
-            });
-            
-            // Kombinera data
-            const allUsers = Object.values(users).map(user => ({
-                ...user,
-                role: roles[user.uid]?.role || 'user',
-                isCurrentUser: user.uid === currentUser.uid
-            }));
-            
+            // Sortera: admin först, sedan moderator, sedan user
             return allUsers.sort((a, b) => {
-                // Sortera: admin först, sedan moderator, sedan user
                 const roleOrder = { admin: 3, moderator: 2, user: 1 };
                 return roleOrder[b.role] - roleOrder[a.role];
             });
             
         } catch (error) {
             console.error('❌ Kunde inte hämta användarlista:', error);
-            return [];
+            
+            // Fallback - försök bara hämta roller
+            try {
+                const rolesSnapshot = await db.collection('userRoles').get();
+                const basicUsers = rolesSnapshot.docs.map(doc => ({
+                    uid: doc.id,
+                    displayName: doc.data().setByName || 'Användare',
+                    email: 'Ej tillgänglig',
+                    role: doc.data().role || 'user',
+                    isCurrentUser: doc.id === currentUser.uid,
+                    photoURL: null,
+                    lastActive: doc.data().setAt,
+                    gameStats: {}
+                }));
+                
+                console.log('⚠️ Använder grundläggande användardata');
+                return basicUsers.sort((a, b) => {
+                    const roleOrder = { admin: 3, moderator: 2, user: 1 };
+                    return roleOrder[b.role] - roleOrder[a.role];
+                });
+                
+            } catch (fallbackError) {
+                console.error('❌ Även fallback misslyckades:', fallbackError);
+                return [];
+            }
         }
     }
 

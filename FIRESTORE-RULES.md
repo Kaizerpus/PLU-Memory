@@ -7,9 +7,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Användardata - endast ägaren kan läsa/skriva sin egen data
+    // Användardata - ägaren kan läsa/skriva sin egen data, moderatorer kan läsa alla
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (
+        get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.role in ['admin', 'moderator']
+      );
     }
     
     // Roller - alla inloggade kan läsa, endast admin kan skriva

@@ -5024,6 +5024,81 @@ button:active, .btn:active {
     }
 }
 
+/* Auth section in profile page */
+.auth-section-profile {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.auth-section-profile h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+.user-info-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.auth-buttons-profile {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.google-btn-red {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    border-radius: 8px;
+    padding: 12px 20px;
+}
+
+.google-btn-red:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    transform: translateY(-1px);
+}
+
+.logout-btn-red {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    padding: 12px 20px;
+}
+
+.logout-btn-red:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.auth-section-profile .help-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
+
 /* Achievement Modal */
 .achievement-modal .modal-content {
     background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);

@@ -474,11 +474,16 @@ class FirebaseManager {
             userInfo.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
         }
         
-        // Update main menu userInfoMenu
+        // Update profile auth section userInfoMenu 
         if (userInfoMenu && currentUser) {
-            userInfoMenu.innerHTML = `Inloggad som ${currentUser.displayName}`;
+            userInfoMenu.innerHTML = `
+                <div class="user-profile">
+                    <img src="${currentUser.photoURL}" alt="Profil" class="profile-img">
+                    <span>Inloggad som ${currentUser.displayName}</span>
+                </div>
+            `;
         } else if (userInfoMenu) {
-            userInfoMenu.innerHTML = 'Inte inloggad - data sparas lokalt';
+            userInfoMenu.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
         }
     }
 
@@ -780,7 +785,13 @@ class FirebaseManager {
         if (userInfoMenu && currentUser) {
             const roleEmoji = this.isAdmin ? '👑' : this.isModerator ? '🛡️' : '👤';
             const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'Användare';
-            userInfoMenu.innerHTML = `${roleEmoji} Inloggad som ${currentUser.displayName} (${roleText})`;
+            userInfoMenu.innerHTML = `
+                <div class="user-profile">
+                    <img src="${currentUser.photoURL}" alt="Profil" class="profile-img">
+                    <span>Inloggad som ${currentUser.displayName}</span>
+                    <span class="role-badge ${this.userRole}">${roleEmoji} ${roleText}</span>
+                </div>
+            `;
         }
     }
     

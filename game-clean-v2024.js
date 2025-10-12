@@ -1576,18 +1576,13 @@ class DataManager {
     }
 
     refreshUI() {
-        // Uppdatera highscore display
-        if (window.highscoreManager) {
-            window.highscoreManager.displayHighscores();
-        }
-
-        // Uppdatera achievements display
-        if (window.achievementsManager) {
-            window.achievementsManager.displayAchievements();
-        }
-
+        // Achievements UI uppdateras automatiskt via achievement system
+        // Behöver inte explicit displayAchievements-anrop här
+        
         // Uppdatera andra UI-element
-        window.location.reload(); // Enkel lösning för att uppdatera allt
+        console.log('🔄 Uppdaterar UI efter data-restore');
+        // Kommenterar bort window.location.reload() för att undvika oändlig loop
+        // window.location.reload();
     }
 
     // Restore data från Firebase (för kompatibilitet)
@@ -2016,8 +2011,8 @@ class BackupManager {
 const backupManager = new BackupManager();
 window.backupManager = backupManager;
 
-// Embedded product data - alla 21 produkter från JSON-filen
-const products = [
+// Embedded product data - alla 21 produkter från JSON-filen (fallback)
+const defaultProducts = [
     // Grönsaker
     { name: "Morot", plu: "4562", image: "images/morot.jpg", category: "grönsaker", difficulty: "vanlig" },
     { name: "Potatis", plu: "4782", image: "images/potatis.jpg", category: "grönsaker", difficulty: "vanlig" },
@@ -2049,6 +2044,54 @@ const products = [
     { name: "Tor", plu: "5003", image: "images/tor.jpg", category: "söndagsbröd", difficulty: "ovanlig" },
     { name: "Kanelbulle", plu: "5004", image: "images/kanelbulle.jpg", category: "söndagsbröd", difficulty: "vanlig" }
 ];
+
+// Global produktlista - kommer att laddas från Firestore eller fallback till defaultProducts
+let products = [...defaultProducts];
+
+// Funktion för att ladda produkter från Firestore
+async function loadProducts() {
+    console.log('📦 Försöker ladda produkter från Firestore...');
+    
+    if (!window.firebaseManager || !window.firebaseManager.isInitialized) {
+        console.log('⚠️ Firebase inte tillgängligt, använder default produkter');
+        products = [...defaultProducts];
+        return products;
+    }
+    
+    try {
+        const firestoreProducts = await window.firebaseManager.loadProductsFromFirestore();
+        
+        if (firestoreProducts && firestoreProducts.length > 0) {
+            console.log(`✅ Laddade ${firestoreProducts.length} produkter från Firestore`);
+            products = firestoreProducts;
+            
+            // Spara i localStorage som cache
+            localStorage.setItem('cachedProducts', JSON.stringify(products));
+            localStorage.setItem('cachedProductsTimestamp', Date.now().toString());
+        } else {
+            // Försök ladda från localStorage cache
+            const cachedProducts = localStorage.getItem('cachedProducts');
+            const cachedTimestamp = localStorage.getItem('cachedProductsTimestamp');
+            
+            if (cachedProducts && cachedTimestamp) {
+                const age = Date.now() - parseInt(cachedTimestamp);
+                if (age < 24 * 60 * 60 * 1000) { // 24 timmar
+                    console.log('📱 Använder cachade produkter från localStorage');
+                    products = JSON.parse(cachedProducts);
+                    return products;
+                }
+            }
+            
+            console.log('📦 Inga Firestore produkter, använder default');
+            products = [...defaultProducts];
+        }
+    } catch (error) {
+        console.error('❌ Fel vid laddning av produkter:', error);
+        products = [...defaultProducts];
+    }
+    
+    return products;
+}
 
 // Game state
 let currentProduct = null;
@@ -2931,9 +2974,10 @@ function startNewQuestion() {
             window.imageOptimizer.setupImageForGame(productImage, currentProduct.image);
         } else {
             // Fallback for browsers without image optimization
-            productImage.src = currentProduct.image;
+            productImage.src = currentProduct.image || 'images/Placeholder.png';
             productImage.alt = currentProduct.name;
             productImage.classList.add('vegetable-image');
+            productImage.onerror = function() { this.src = 'images/Placeholder.png'; };
         }
         
         // Animera bildövergång
@@ -3235,6 +3279,12 @@ function updateScoreInternal() {
 // Initialize when DOM is loaded
 function initGame() {
     console.log('Initialiserar PLU Memory Game...');
+    
+    // Load products from Firestore or fallback to default
+    loadProducts().then(() => {
+        console.log(`✅ Produkter laddade: ${products.length} tillgängliga`);
+        updateFilterOptions(); // Uppdatera filtren baserat på nya produkter
+    });
     
     // Load accessibility preferences
     loadAccessibilityPreferences();
@@ -3851,6 +3901,26 @@ function showProfile() {
                         </div>
                     </div>
                 </div>
+                
+                <!-- Admin/Moderator sektion -->
+                <div id="adminSection" class="admin-section" style="display: none;">
+                    <div class="admin-header">
+                        <h3>🔧 Administratörsverktyg</h3>
+                        <p>Hantera produkter och innehåll</p>
+                    </div>
+                    
+                    <div class="admin-buttons">
+                        <button id="manageProductsBtn" class="btn btn-warning">
+                            📦 Hantera produkter
+                        </button>
+                        <button id="importProductsBtn" class="btn btn-info">
+                            📥 Importera från JSON
+                        </button>
+                        <button id="exportProductsBtn" class="btn btn-secondary">
+                            📤 Exportera produkter
+                        </button>
+                    </div>
+                </div>
             </div>
         `;
         
@@ -3866,6 +3936,26 @@ function showProfile() {
             if (window.setupAuthButtons) {
                 console.log('🔄 Setting up auth buttons after profile content loaded');
                 window.setupAuthButtons();
+            }
+            
+            // Uppdatera auth UI efter att profil-elementen finns
+            if (window.updateAuthUI) {
+                console.log('🔄 Updating auth UI after profile elements created');
+                window.updateAuthUI();
+            }
+            
+            // Visa leaderboard om Firebase är tillgängligt
+            if (window.firebaseManager && window.firebaseManager.isInitialized) {
+                displayLeaderboard();
+            }
+            
+            // Visa admin-sektion för moderatorer/admins
+            if (window.firebaseManager && (window.firebaseManager.isModerator || window.firebaseManager.isAdmin)) {
+                const adminSection = document.getElementById('adminSection');
+                if (adminSection) {
+                    adminSection.style.display = 'block';
+                    setupProductManagementButtons();
+                }
             }
         }, 100);
         
@@ -3947,6 +4037,597 @@ function resetAllStats() {
         alert('❌ Det uppstod ett fel vid nollställning av statistik.');
     }
 }
+
+// 🛒 PRODUKTHANTERING - Admin & Moderator funktioner
+
+// Funktion för att hämta alla unika kategorier från produktlistan
+function getUniqueCategories() {
+    const categories = new Set();
+    
+    // Lägg till standardkategorier
+    categories.add('grönsaker');
+    categories.add('bröd');
+    categories.add('snacks');
+    categories.add('bakverk');
+    categories.add('söndagsbröd');
+    
+    // Lägg till kategorier från befintliga produkter
+    products.forEach(product => {
+        if (product.category && product.category.trim()) {
+            categories.add(product.category.trim().toLowerCase());
+        }
+    });
+    
+    return Array.from(categories).sort();
+}
+
+// Funktion för att skapa kategori-options för select element
+function buildCategoryOptions(selectedCategory = '') {
+    const categories = getUniqueCategories();
+    const categoryLabels = {
+        'grönsaker': '🥕 Grönsaker',
+        'bröd': '🍞 Bröd', 
+        'snacks': '🍿 Snacks',
+        'bakverk': '🧁 Bakverk',
+        'söndagsbröd': '🥖 Söndagsbröd'
+    };
+    
+    return categories.map(category => {
+        const label = categoryLabels[category] || `📦 ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+        const selected = category === selectedCategory ? 'selected' : '';
+        return `<option value="${category}" ${selected}>${label}</option>`;
+    }).join('');
+}
+
+function setupProductManagementButtons() {
+    const manageProductsBtn = document.getElementById('manageProductsBtn');
+    const importProductsBtn = document.getElementById('importProductsBtn');
+    const exportProductsBtn = document.getElementById('exportProductsBtn');
+    
+    if (manageProductsBtn) {
+        manageProductsBtn.addEventListener('click', showProductManagement);
+    }
+    
+    if (importProductsBtn) {
+        importProductsBtn.addEventListener('click', showImportProductsDialog);
+    }
+    
+    if (exportProductsBtn) {
+        exportProductsBtn.addEventListener('click', exportProducts);
+    }
+}
+
+function showProductManagement() {
+    console.log('Visar produkthantering');
+    
+    // Skapa modal för produkthantering
+    const modal = document.createElement('div');
+    modal.className = 'modal show product-management-modal';
+    modal.innerHTML = `
+        <div class="modal-content product-management-content">
+            <div class="modal-header">
+                <h2>📦 Produkthantering</h2>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="product-actions">
+                    <button id="addNewProductBtn" class="btn btn-success">➕ Lägg till ny produkt</button>
+                    <button id="refreshProductsBtn" class="btn btn-info">🔄 Uppdatera från databas</button>
+                </div>
+                
+                <div class="products-list" id="productsList">
+                    <div class="loading">Laddar produkter...</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Kort delay för att säkerställa att DOM är redo
+    setTimeout(() => {
+        // Ladda och visa produkter
+        loadAndDisplayProducts();
+    }, 100);
+    
+    // Setup event listeners
+    const addNewProductBtn = document.getElementById('addNewProductBtn');
+    const refreshProductsBtn = document.getElementById('refreshProductsBtn');
+    
+    if (addNewProductBtn) {
+        addNewProductBtn.addEventListener('click', showAddProductDialog);
+    }
+    
+    if (refreshProductsBtn) {
+        refreshProductsBtn.addEventListener('click', () => {
+            loadProducts().then(() => {
+                loadAndDisplayProducts();
+                if (window.showToast) {
+                    window.showToast('Produkter uppdaterade', 'success');
+                }
+            });
+        });
+    }
+}
+
+async function loadAndDisplayProducts() {
+    console.log('🔍 loadAndDisplayProducts anropad');
+    const productsList = document.getElementById('productsList');
+    if (!productsList) {
+        console.error('❌ ProductsList element hittades inte');
+        return;
+    }
+    
+    console.log('✅ ProductsList element hittat:', productsList);
+    
+    try {
+        productsList.innerHTML = '<div class="loading">Laddar produkter...</div>';
+        
+        // Ladda produkter (från Firestore eller default)
+        await loadProducts();
+        
+        displayProducts();
+        
+    } catch (error) {
+        console.error('Fel vid laddning av produkter:', error);
+        productsList.innerHTML = '<div class="error">Fel vid laddning av produkter</div>';
+    }
+}
+
+// Funktion för att bara visa produkter utan att ladda om dem
+function displayProducts() {
+    const productsList = document.getElementById('productsList');
+    if (!productsList) {
+        console.error('❌ ProductsList element hittades inte');
+        return;
+    }
+    
+    try {
+        console.log(`📦 Försöker visa ${products.length} produkter`);
+        console.log('📋 Produkter:', products.slice(0, 2)); // Visa första 2 produkter
+        
+        if (products.length === 0) {
+            productsList.innerHTML = '<div class="no-products">Inga produkter hittades</div>';
+            return;
+        }
+        
+        // Bygg produktlista
+        let html = '<div class="products-grid">';
+        products.forEach((product, index) => {
+            html += `
+                <div class="product-item" data-index="${index}">
+                    <div class="product-info">
+                        <img src="${product.image || 'images/Placeholder.png'}" alt="${product.name}" class="product-image" onerror="this.src='images/Placeholder.png'">
+                        <div class="product-details">
+                            <h4>${product.name}</h4>
+                            <p><strong>PLU:</strong> ${product.plu}</p>
+                            <p><strong>Kategori:</strong> ${product.category}</p>
+                            <p><strong>Svårighet:</strong> ${product.difficulty}</p>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn btn-sm btn-primary edit-product" data-index="${index}">✏️ Redigera</button>
+                        ${window.firebaseManager?.isAdmin ? `<button class="btn btn-sm btn-danger delete-product" data-index="${index}">🗑️ Ta bort</button>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        productsList.innerHTML = html;
+        
+        console.log(`✅ Produktlista uppdaterad med ${products.length} produkter`);
+        console.log('📋 Modal content:', productsList.innerHTML.substring(0, 200) + '...');
+        
+        // Setup event listeners för edit och delete
+        document.querySelectorAll('.edit-product').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                showEditProductDialog(products[index], index);
+            });
+        });
+
+        if (window.firebaseManager?.isAdmin) {
+            document.querySelectorAll('.delete-product').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    deleteProduct(products[index], index);
+                });
+            });
+        }
+        
+    } catch (error) {
+        console.error('Fel vid visning av produkter:', error);
+        productsList.innerHTML = '<div class="error">Fel vid visning av produkter</div>';
+    }
+}function showAddProductDialog() {
+    showProductDialog(null, -1, 'Lägg till ny produkt');
+}
+
+function showEditProductDialog(product, index) {
+    showProductDialog(product, index, 'Redigera produkt');
+}
+
+function showProductDialog(product, index, title) {
+    const isEdit = product !== null;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal show product-dialog-modal';
+    modal.innerHTML = `
+        <div class="modal-content product-dialog-content">
+            <div class="modal-header">
+                <h2>${title}</h2>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm" class="product-form">
+                    <div class="form-group">
+                        <label for="productName">Produktnamn:</label>
+                        <input type="text" id="productName" name="name" value="${product?.name || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productPlu">PLU-kod:</label>
+                        <input type="text" id="productPlu" name="plu" value="${product?.plu || ''}" required pattern="[0-9]{4}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productImage">Produktbild:</label>
+                        <input type="text" id="productImage" name="image" value="${product?.image || ''}" placeholder="images/Placeholder.png">
+                        <small style="color: #666; font-size: 0.9em;">Ange sökväg till bildfil (t.ex. images/apple.png)</small>
+                        ${product?.image && product.image !== 'images/Placeholder.png' ? 
+                            `<div class="current-image-preview">
+                                <img src="${product.image}" alt="Aktuell bild" style="max-width: 100px; max-height: 100px; margin-top: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>` : 
+                            ''}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productCategory">Kategori:</label>
+                        <div class="category-input-group">
+                            <select id="productCategory" name="category" required>
+                                ${buildCategoryOptions(product?.category)}
+                            </select>
+                            ${window.firebaseManager?.isModerator || window.firebaseManager?.isAdmin ? 
+                                '<button type="button" id="addCategoryBtn" class="btn btn-secondary btn-sm">➕ Ny kategori</button>' : 
+                                ''}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productDifficulty">Svårighetsgrad:</label>
+                        <select id="productDifficulty" name="difficulty" required>
+                            <option value="vanlig" ${product?.difficulty === 'vanlig' ? 'selected' : ''}>Vanlig</option>
+                            <option value="medel" ${product?.difficulty === 'medel' ? 'selected' : ''}>Medel</option>
+                            <option value="ovanlig" ${product?.difficulty === 'ovanlig' ? 'selected' : ''}>Ovanlig</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">${isEdit ? 'Uppdatera' : 'Lägg till'}</button>
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Avbryt</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Setup form submission
+    const form = document.getElementById('productForm');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const productData = {
+            name: formData.get('name'),
+            plu: formData.get('plu'),
+            image: formData.get('image') || 'images/Placeholder.png', // Använd placeholder om tom
+            category: formData.get('category'),
+            difficulty: formData.get('difficulty')
+        };
+        
+        try {
+            let success = false;
+            
+            if (isEdit && product.id) {
+                // Uppdatera i Firestore
+                success = await window.firebaseManager.updateProduct(product.id, productData);
+                if (success) {
+                    // Uppdatera lokal kopia
+                    products[index] = { ...product, ...productData };
+                }
+            } else {
+                // Lägg till i Firestore
+                const newId = await window.firebaseManager.addProduct(productData);
+                if (newId) {
+                    // Lägg till i lokal kopia
+                    products.push({ ...productData, id: newId });
+                    success = true;
+                }
+            }
+            
+            if (success) {
+                modal.remove();
+                displayProducts(); // Visa produkter utan att ladda om från databas
+                if (window.showToast) {
+                    window.showToast(isEdit ? 'Produkt uppdaterad' : 'Produkt tillagd', 'success');
+                }
+            } else {
+                if (window.showToast) {
+                    window.showToast('Fel vid sparande av produkt', 'error');
+                }
+            }
+            
+        } catch (error) {
+            console.error('Fel vid sparande av produkt:', error);
+            if (window.showToast) {
+                window.showToast('Fel vid sparande av produkt', 'error');
+            }
+        }
+    });
+    
+    // Event listener för "Lägg till kategori" knappen
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    if (addCategoryBtn) {
+        addCategoryBtn.addEventListener('click', () => {
+            showAddCategoryDialog();
+        });
+    }
+    
+    // Event listener för bilduppladdning
+}
+
+// Funktion för att visa dialog för att lägga till ny kategori
+function showAddCategoryDialog() {
+    const modal = document.createElement('div');
+    modal.className = 'modal show category-dialog-modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>➕ Lägg till ny kategori</h2>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">Kategorinamn:</label>
+                        <input type="text" id="categoryName" name="categoryName" required 
+                               placeholder="T.ex. drycker, mejeri, kött">
+                        <small style="color: #666; font-size: 0.9em;">Använd gemener och inga mellanslag</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">Lägg till</button>
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Avbryt</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Setup form submission
+    const form = document.getElementById('categoryForm');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const categoryName = formData.get('categoryName').trim().toLowerCase();
+        
+        if (!categoryName) {
+            if (window.showToast) {
+                window.showToast('Kategorinamn krävs', 'error');
+            }
+            return;
+        }
+        
+        // Kontrollera om kategorin redan finns
+        const existingCategories = getUniqueCategories();
+        if (existingCategories.includes(categoryName)) {
+            if (window.showToast) {
+                window.showToast('Kategorin finns redan', 'error');
+            }
+            return;
+        }
+        
+        // Lägg till kategorin genom att uppdatera select-elementet
+        const categorySelect = document.getElementById('productCategory');
+        if (categorySelect) {
+            // Lägg till ny option
+            const newOption = document.createElement('option');
+            newOption.value = categoryName;
+            newOption.textContent = `📦 ${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}`;
+            newOption.selected = true;
+            categorySelect.appendChild(newOption);
+            
+            // Stäng modalen
+            modal.remove();
+            
+            if (window.showToast) {
+                window.showToast(`Kategori "${categoryName}" tillagd`, 'success');
+            }
+        }
+    });
+}
+
+async function deleteProduct(product, index) {
+    if (!window.firebaseManager?.isAdmin) {
+        if (window.showToast) {
+            window.showToast('Behöver admin-rättigheter för att ta bort produkter', 'error');
+        }
+        return;
+    }
+    
+    if (!confirm(`Är du säker på att du vill ta bort "${product.name}"?`)) {
+        return;
+    }
+    
+    try {
+        let success = false;
+        
+        if (product.id) {
+            success = await window.firebaseManager.deleteProduct(product.id);
+        }
+        
+        if (success) {
+            // Ta bort från lokal kopia
+            products.splice(index, 1);
+            displayProducts(); // Visa produkter utan att ladda om från databas
+            if (window.showToast) {
+                window.showToast('Produkt borttagen', 'success');
+            }
+        } else {
+            if (window.showToast) {
+                window.showToast('Fel vid borttagning av produkt', 'error');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Fel vid borttagning av produkt:', error);
+        if (window.showToast) {
+            window.showToast('Fel vid borttagning av produkt', 'error');
+        }
+    }
+}
+
+function showImportProductsDialog() {
+    const modal = document.createElement('div');
+    modal.className = 'modal show import-dialog-modal';
+    modal.innerHTML = `
+        <div class="modal-content import-dialog-content">
+            <div class="modal-header">
+                <h2>📥 Importera produkter från JSON</h2>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Välj en JSON-fil med produkter att importera till databasen.</p>
+                <div class="file-input-group">
+                    <input type="file" id="jsonFileInput" accept=".json" class="file-input">
+                    <button id="importBtn" class="btn btn-success" disabled>Importera</button>
+                </div>
+                <div id="importPreview" class="import-preview"></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const fileInput = document.getElementById('jsonFileInput');
+    const importBtn = document.getElementById('importBtn');
+    const preview = document.getElementById('importPreview');
+    
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    if (Array.isArray(jsonData)) {
+                        preview.innerHTML = `<p>✅ ${jsonData.length} produkter redo för import</p>`;
+                        importBtn.disabled = false;
+                        importBtn.onclick = () => importProductsFromJSON(jsonData, modal);
+                    } else {
+                        preview.innerHTML = '<p>❌ Ogiltig JSON-format</p>';
+                        importBtn.disabled = true;
+                    }
+                } catch (error) {
+                    preview.innerHTML = '<p>❌ Fel vid läsning av JSON-fil</p>';
+                    importBtn.disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+}
+
+async function importProductsFromJSON(jsonData, modal) {
+    try {
+        const importCount = await window.firebaseManager.importProductsFromJSON(jsonData);
+        
+        if (importCount) {
+            modal.remove();
+            await loadProducts(); // Ladda om produkter
+            loadAndDisplayProducts(); // Uppdatera visning om produkthantering är öppen
+            if (window.showToast) {
+                window.showToast(`${importCount} produkter importerade`, 'success');
+            }
+        } else {
+            if (window.showToast) {
+                window.showToast('Fel vid import av produkter', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Fel vid import:', error);
+        if (window.showToast) {
+            window.showToast('Fel vid import av produkter', 'error');
+        }
+    }
+}
+
+function exportProducts() {
+    try {
+        const dataStr = JSON.stringify(products, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `plu-products-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        if (window.showToast) {
+            window.showToast('Produkter exporterade', 'success');
+        }
+    } catch (error) {
+        console.error('Fel vid export:', error);
+        if (window.showToast) {
+            window.showToast('Fel vid export av produkter', 'error');
+        }
+    }
+}
+
+// Initial import av default produkter till Firestore (för admins)
+async function importDefaultProductsToFirestore() {
+    if (!window.firebaseManager || !window.firebaseManager.isAdmin) {
+        console.log('🚫 Behöver admin-rättigheter för att importera default produkter');
+        return false;
+    }
+    
+    try {
+        console.log('📥 Startar import av default produkter till Firestore...');
+        
+        // Kolla om det redan finns produkter i Firestore
+        const existingProducts = await window.firebaseManager.loadProductsFromFirestore();
+        if (existingProducts && existingProducts.length > 0) {
+            console.log('ℹ️ Produkter finns redan i Firestore, hoppar över import');
+            return false;
+        }
+        
+        const importCount = await window.firebaseManager.importProductsFromJSON(defaultProducts);
+        
+        if (importCount) {
+            console.log(`✅ Importerade ${importCount} default produkter till Firestore`);
+            // Ladda om produkter från Firestore
+            await loadProducts();
+            if (window.showToast) {
+                window.showToast(`${importCount} default produkter importerade till databasen`, 'success');
+            }
+            return true;
+        }
+        
+        return false;
+        
+    } catch (error) {
+        console.error('❌ Fel vid import av default produkter:', error);
+        return false;
+    }
+}
+
+// Exponera funktionen globalt för admin-konsol
+window.importDefaultProductsToFirestore = importDefaultProductsToFirestore;
 
 function showAccessibility() {
     console.log('Visar tillgänglighet');
@@ -5060,17 +5741,6 @@ async function displayLeaderboard() {
         </div>
     `;
 }
-
-// Uppdatera leaderboard när profilen öppnas
-const originalShowProfile = showProfile;
-showProfile = async function() {
-    const result = originalShowProfile.apply(this, arguments);
-    
-    // Visa leaderboard efter en kort fördröjning
-    setTimeout(displayLeaderboard, 500);
-    
-    return result;
-};
 
 console.log('🎮 Ultra Clean Script laddad klart - v2024 + Mobile Enhanced + Firebase');
 

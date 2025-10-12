@@ -1,6 +1,6 @@
-// Firebase konfiguration för PLU Memory Game
-// ⚠️ VIKTIGT: Ersätt värdena nedan med dina egna från Firebase Console
-// Se FIREBASE-SETUP.md för detaljerade instruktioner
+﻿// Firebase konfiguration fÃ¶r PLU Memory Game
+// âš ï¸ VIKTIGT: ErsÃ¤tt vÃ¤rdena nedan med dina egna frÃ¥n Firebase Console
+// Se FIREBASE-SETUP.md fÃ¶r detaljerade instruktioner
 
 const firebaseConfig = {
  apiKey: "AIzaSyBomzD9K7HgrR2A5vHBl6O_ovKMQS4tISE",
@@ -12,13 +12,13 @@ const firebaseConfig = {
   measurementId: "G-2XHS3S9BMJ"
 };
 
-// Firebase-moduler som laddas från CDN
+// Firebase-moduler som laddas frÃ¥n CDN
 let firebase = null;
 let db = null;
 let auth = null;
 let currentUser = null;
 
-// 🔥 Firebase Manager - Hanterar all Firebase-funktionalitet
+// ðŸ”¥ Firebase Manager - Hanterar all Firebase-funktionalitet
 class FirebaseManager {
     constructor() {
         this.isInitialized = false;
@@ -31,8 +31,9 @@ class FirebaseManager {
         this.userRole = 'user'; // 'user', 'moderator', 'admin'
         this.isAdmin = false;
         this.isModerator = false;
+        this.lastAuthStateChange = 0; // Throttle auth state changes
         
-        // Lyssna på nätverksstatus
+        // Lyssna pÃ¥ nÃ¤tverksstatus
         window.addEventListener('online', () => {
             this.isOnline = true;
             this.syncPendingData();
@@ -47,76 +48,107 @@ class FirebaseManager {
         try {
             // Kontrollera om redan initialiserat
             if (this.isInitialized) {
-                console.log('🔄 Firebase redan initialiserat');
+                console.log('ðŸ”„ Firebase redan initialiserat');
                 return true;
             }
             
-            console.log('🔥 Startar Firebase-initialisering...');
+            console.log('ðŸ”¥ Startar Firebase-initialisering...');
             
-            // Kontrollera om Firebase config är konfigurerad
-            if (firebaseConfig.apiKey === "DIN_API_KEY_HÄR") {
-                console.log('⚠️ Firebase inte konfigurerad - använder offline-läge');
+            // Kontrollera om Firebase config Ã¤r konfigurerad
+            if (firebaseConfig.apiKey === "DIN_API_KEY_HÃ„R") {
+                console.log('âš ï¸ Firebase inte konfigurerad - anvÃ¤nder offline-lÃ¤ge');
                 return false;
             }
 
-            console.log('📋 Firebase config verkar konfigurerad:', {
+            console.log('ðŸ“‹ Firebase config verkar konfigurerad:', {
                 projectId: firebaseConfig.projectId,
                 authDomain: firebaseConfig.authDomain
             });
 
-            // Kontrollera om Firebase redan är laddat
+            // Kontrollera om Firebase redan Ã¤r laddat
             if (!window.firebase) {
-                console.log('📦 Laddar Firebase scripts från CDN...');
+                console.log('ðŸ“¦ Laddar Firebase scripts frÃ¥n CDN...');
                 await this.loadFirebaseScripts();
-                console.log('✅ Firebase scripts laddade');
+                console.log('âœ… Firebase scripts laddade');
             } else {
-                console.log('♻️ Firebase scripts redan laddade');
+                console.log('â™»ï¸ Firebase scripts redan laddade');
             }
             
             // Initiera Firebase (bara om inte redan gjort)
             firebase = window.firebase;
             if (!firebase) {
-                throw new Error('Firebase kunde inte laddas från CDN');
+                throw new Error('Firebase kunde inte laddas frÃ¥n CDN');
             }
             
-            // Kontrollera om Firebase app redan är initialiserad
+            // Kontrollera om Firebase app redan Ã¤r initialiserad
             if (firebase.apps.length === 0) {
-                console.log('🚀 Initialiserar Firebase med config...');
+                console.log('ðŸš€ Initialiserar Firebase med config...');
                 firebase.initializeApp(firebaseConfig);
-                console.log('✅ Firebase app initialiserad');
+                console.log('âœ… Firebase app initialiserad');
             } else {
-                console.log('♻️ Firebase app redan initialiserad');
+                console.log('â™»ï¸ Firebase app redan initialiserad');
             }
             
-            // Sätt upp Firestore och Auth
-            console.log('🗃️ Sätter upp Firestore...');
+            // SÃ¤tt upp Firestore och Auth
+            console.log('ðŸ—ƒï¸ SÃ¤tter upp Firestore...');
             db = firebase.firestore();
-            console.log('✅ Firestore konfigurerad');
+            console.log('âœ… Firestore konfigurerad');
             
-            console.log('🔐 Sätter upp Authentication...');
+            
+            console.log('ï¿½ðŸ” SÃ¤tter upp Authentication...');
             auth = firebase.auth();
-            console.log('✅ Auth konfigurerad');
             
-            // Aktivera offline-stöd (bara en gång)
+            // Konfigurera auth persistence fÃ¶r att behÃ¥lla inloggning
+            try {
+                // FÃ¶rsÃ¶k med LOCAL persistence fÃ¶rst
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                console.log('âœ… Auth persistence konfigurerad (LOCAL)');
+            } catch (error) {
+                console.log('âš ï¸ LOCAL persistence misslyckades, fÃ¶rsÃ¶ker SESSION...', error.message);
+                try {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+                    console.log('âœ… Auth persistence konfigurerad (SESSION)');
+                } catch (sessionError) {
+                    console.log('âš ï¸ Auth persistence kunde inte konfigureras:', sessionError.message);
+                }
+            }
+            
+            console.log('âœ… Auth konfigurerad');
+            
+            // Aktivera offline-stÃ¶d (bara en gÃ¥ng)
             if (!this.persistenceEnabled) {
-                console.log('💾 Aktiverar offline persistence...');
+                console.log('ðŸ’¾ Aktiverar offline persistence...');
                 db.enablePersistence({ synchronizeTabs: true })
                     .then(() => {
-                        console.log('✅ Offline persistence aktiverat');
+                        console.log('âœ… Offline persistence aktiverat');
                         this.persistenceEnabled = true;
                     })
                     .catch(err => {
-                        console.log('⚠️ Offline persistence kunde inte aktiveras:', err.message);
-                        // Detta är OK, fortsätt ändå
+                        console.log('âš ï¸ Offline persistence kunde inte aktiveras:', err.message);
+                        // Detta Ã¤r OK, fortsÃ¤tt Ã¤ndÃ¥
                     });
             }
             
-            // Lyssna på autentiseringsförändringar (bara en gång)
+            // Lyssna pÃ¥ autentiseringsfÃ¶rÃ¤ndringar (bara en gÃ¥ng)
             if (!this.authListenerSet) {
-                console.log('👂 Sätter upp auth state listener...');
+                console.log('ðŸ‘‚ SÃ¤tter upp auth state listener...');
+                
+                // Kontrollera redirect-resultat fÃ¶rst
+                try {
+                    const result = await auth.getRedirectResult();
+                    if (result.user) {
+                        console.log('âœ… Redirect-inloggning framgÃ¥ngsrik:', result.user.displayName);
+                        if (window.showToast) {
+                            window.showToast(`VÃ¤lkommen ${result.user.displayName}! ðŸ‘‹`, 'success');
+                        }
+                    }
+                } catch (error) {
+                    console.log('âš ï¸ Redirect-resultat fel:', error.message);
+                }
+                
                 auth.onAuthStateChanged(async user => {
                     currentUser = user;
-                    console.log('👤 Auth state ändrad:', user ? `Inloggad som ${user.displayName}` : 'Ej inloggad');
+                    console.log('ðŸ‘¤ Auth state Ã¤ndrad:', user ? `Inloggad som ${user.displayName}` : 'Ej inloggad');
                     
                     if (user) {
                         await this.checkUserRole(user);
@@ -128,8 +160,8 @@ class FirebaseManager {
             }
 
             this.isInitialized = true;
-            console.log('🎉 Firebase fullständigt initialiserat!');
-            console.log('✅ Final status check:', {
+            console.log('ðŸŽ‰ Firebase fullstÃ¤ndigt initialiserat!');
+            console.log('âœ… Final status check:', {
                 isInitialized: this.isInitialized,
                 auth: !!auth,
                 db: !!db,
@@ -138,8 +170,8 @@ class FirebaseManager {
             return true;
             
         } catch (error) {
-            console.error('❌ Firebase init misslyckades:', error);
-            console.error('📍 Fel detaljer:', {
+            console.error('âŒ Firebase init misslyckades:', error);
+            console.error('ðŸ“ Fel detaljer:', {
                 message: error.message,
                 code: error.code,
                 stack: error.stack
@@ -156,93 +188,139 @@ class FirebaseManager {
         ];
 
         for (const src of scripts) {
-            console.log(`📥 Laddar: ${src}`);
+            console.log(`ðŸ“¥ Laddar: ${src}`);
             try {
                 await new Promise((resolve, reject) => {
                     const script = document.createElement('script');
                     script.src = src;
                     script.onload = () => {
-                        console.log(`✅ Laddad: ${src}`);
+                        console.log(`âœ… Laddad: ${src}`);
                         resolve();
                     };
                     script.onerror = (error) => {
-                        console.error(`❌ Kunde inte ladda: ${src}`, error);
+                        console.error(`âŒ Kunde inte ladda: ${src}`, error);
                         reject(new Error(`Failed to load script: ${src}`));
                     };
                     document.head.appendChild(script);
                 });
             } catch (error) {
-                console.error(`💥 Script-laddning misslyckades för ${src}:`, error);
+                console.error(`ðŸ’¥ Script-laddning misslyckades fÃ¶r ${src}:`, error);
                 throw error;
             }
         }
         
-        console.log('🔍 Kontrollerar att Firebase är tillgängligt...');
+        console.log('ðŸ” Kontrollerar att Firebase Ã¤r tillgÃ¤ngligt...');
         if (typeof window.firebase === 'undefined') {
-            throw new Error('Firebase inte tillgängligt efter script-laddning');
+            throw new Error('Firebase inte tillgÃ¤ngligt efter script-laddning');
         }
-        console.log('✅ Firebase globalt objekt bekräftat');
+        console.log('âœ… Firebase globalt objekt bekrÃ¤ftat');
+    }
+
+    // VÃ¤nta pÃ¥ att anvÃ¤ndaren ska Ã¥terstÃ¤llas vid reload
+    async waitForAuthRestore() {
+        return new Promise((resolve) => {
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+                unsubscribe();
+                console.log('ðŸ”„ Auth state Ã¥terstÃ¤lld:', user ? 'Inloggad' : 'Ej inloggad');
+                resolve(user);
+            });
+            
+            // Timeout efter 3 sekunder
+            setTimeout(() => {
+                unsubscribe();
+                console.log('â° Auth restore timeout');
+                resolve(null);
+            }, 3000);
+        });
     }
 
     handleAuthStateChange(user) {
+        const now = Date.now();
+        // Throttle auth state changes till max en gÃ¥ng per sekund
+        if (now - this.lastAuthStateChange < 1000) {
+            console.log('ðŸš« Auth state change throttled');
+            return;
+        }
+        this.lastAuthStateChange = now;
+        
         if (user) {
-            console.log('👤 Användare inloggad:', user.displayName);
+            console.log('ðŸ‘¤ AnvÃ¤ndare inloggad:', user.displayName);
             this.syncUserData();
             this.checkUserRole(user);
             this.updateUI(true);
+            
+            // Uppdatera anvÃ¤ndarnamn i profilen om den Ã¤r Ã¶ppen
+            if (window.updateProfileUserName) {
+                setTimeout(() => {
+                    window.updateProfileUserName();
+                }, 200);
+            }
         } else {
-            console.log('👤 Användare utloggad');
+            console.log('ðŸ‘¤ AnvÃ¤ndare utloggad');
             this.updateUI(false);
+            
+            // Uppdatera anvÃ¤ndarnamn till "Anonym" om profilen Ã¤r Ã¶ppen
+            if (window.updateProfileUserName) {
+                setTimeout(() => {
+                    window.updateProfileUserName();
+                }, 200);
+            }
         }
     }
 
     async signInWithGoogle() {
-        console.log('🔐 Startar Google Sign-In process...');
-        console.log('🔍 Kontrollerar Firebase status:', {
+        console.log('ðŸ” Startar Google Sign-In process...');
+        console.log('ðŸ” Kontrollerar Firebase status:', {
             isInitialized: this.isInitialized,
             auth: !!auth,
             firebase: !!firebase
         });
         
         if (!this.isInitialized) {
-            console.error('❌ Firebase inte initialiserat');
-            console.log('🔄 Försöker initiera Firebase nu...');
+            console.error('âŒ Firebase inte initialiserat');
+            console.log('ðŸ”„ FÃ¶rsÃ¶ker initiera Firebase nu...');
             const success = await this.initialize();
             if (!success) {
                 if (window.showToast) {
-                    window.showToast('Firebase kunde inte initialiseras. Försök igen senare.', 'error');
+                    window.showToast('Firebase kunde inte initialiseras. FÃ¶rsÃ¶k igen senare.', 'error');
                 }
                 return false;
             }
         }
         
         if (!auth) {
-            console.error('❌ Firebase Auth inte tillgängligt');
+            console.error('âŒ Firebase Auth inte tillgÃ¤ngligt');
             if (window.showToast) {
-                window.showToast('Authentication inte tillgängligt.', 'error');
+                window.showToast('Authentication inte tillgÃ¤ngligt.', 'error');
             }
             return false;
         }
         
         try {
-            console.log('🏗️ Skapar Google Auth Provider...');
+            console.log('ðŸ—ï¸ Skapar Google Auth Provider...');
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope('profile');
             provider.addScope('email');
             
-            console.log('🪟 Öppnar Google Sign-In popup...');
+            // LÃ¤gg till custom parameters fÃ¶r bÃ¤ttre kompatibilitet
+            provider.setCustomParameters({
+                prompt: 'select_account'
+            });
+            
+            console.log('ðŸªŸ Ã–ppnar Google Sign-In popup...');
             let result;
             
             try {
-                // Försök med popup först
+                // FÃ¶rsÃ¶k med popup fÃ¶rst
                 result = await auth.signInWithPopup(provider);
             } catch (popupError) {
-                console.log('⚠️ Popup misslyckades, försöker redirect...', popupError.code);
+                console.log('âš ï¸ Popup misslyckades:', popupError.code, popupError.message);
                 
                 if (popupError.code === 'auth/popup-blocked' || 
-                    popupError.code === 'auth/popup-closed-by-user') {
+                    popupError.code === 'auth/popup-closed-by-user' ||
+                    popupError.code === 'auth/cancelled-popup-request') {
                     // Fallback till redirect om popup blockeras
-                    console.log('🔄 Använder redirect istället för popup...');
+                    console.log('ðŸ”„ AnvÃ¤nder redirect istÃ¤llet fÃ¶r popup...');
                     await auth.signInWithRedirect(provider);
                     return true; // Redirect hanteras av Firebase
                 } else {
@@ -250,17 +328,24 @@ class FirebaseManager {
                 }
             }
             
-            console.log('✅ Google Sign-In framgångsrik:', {
+            console.log('âœ… Google Sign-In framgÃ¥ngsrik:', {
                 user: result.user.displayName,
                 email: result.user.email,
                 uid: result.user.uid
             });
             
             if (window.showToast) {
-                window.showToast(`Välkommen ${result.user.displayName}! 👋`, 'success');
+                window.showToast(`VÃ¤lkommen ${result.user.displayName}! ðŸ‘‹`, 'success');
             }
             
-            // Triggera en synkronisering av användardata
+            // Uppdatera profilnamn direkt
+            setTimeout(() => {
+                if (window.updateProfileUserName) {
+                    window.updateProfileUserName();
+                }
+            }, 500);
+            
+            // Triggera en synkronisering av anvÃ¤ndardata
             setTimeout(() => {
                 this.syncUserData();
             }, 1000);
@@ -268,7 +353,7 @@ class FirebaseManager {
             return true;
             
         } catch (error) {
-            console.error('❌ Google Sign-In misslyckades:', {
+            console.error('âŒ Google Sign-In misslyckades:', {
                 code: error.code,
                 message: error.message,
                 fullError: error
@@ -278,20 +363,20 @@ class FirebaseManager {
             
             switch (error.code) {
                 case 'auth/popup-closed-by-user':
-                    userMessage += 'Popup stängdes av användaren.';
-                    console.log('ℹ️ Användaren stängde popup-fönstret');
+                    userMessage += 'Popup stÃ¤ngdes av anvÃ¤ndaren.';
+                    console.log('â„¹ï¸ AnvÃ¤ndaren stÃ¤ngde popup-fÃ¶nstret');
                     break;
                 case 'auth/popup-blocked':
-                    userMessage += 'Popup blockerades av webbläsaren. Tillåt popups för denna sida.';
-                    console.log('🚫 Popup blockerades av webbläsaren');
+                    userMessage += 'Popup blockerades av webblÃ¤saren. TillÃ¥t popups fÃ¶r denna sida.';
+                    console.log('ðŸš« Popup blockerades av webblÃ¤saren');
                     break;
                 case 'auth/unauthorized-domain':
-                    userMessage += 'Domänen är inte auktoriserad. Kontakta administratören.';
-                    console.log('🚫 Unauthorized domain - lägg till i Firebase Console');
+                    userMessage += 'DomÃ¤nen Ã¤r inte auktoriserad. Kontakta administratÃ¶ren.';
+                    console.log('ðŸš« Unauthorized domain - lÃ¤gg till i Firebase Console');
                     break;
                 case 'auth/operation-not-allowed':
-                    userMessage += 'Google Sign-In inte aktiverat. Kontakta administratören.';
-                    console.log('🚫 Google Sign-In inte aktiverat i Firebase Console');
+                    userMessage += 'Google Sign-In inte aktiverat. Kontakta administratÃ¶ren.';
+                    console.log('ðŸš« Google Sign-In inte aktiverat i Firebase Console');
                     break;
                 default:
                     userMessage += `Fel: ${error.message}`;
@@ -309,21 +394,21 @@ class FirebaseManager {
         
         try {
             await auth.signOut();
-            window.showToast('Du är nu utloggad', 'info');
+            window.showToast('Du Ã¤r nu utloggad', 'info');
             
         } catch (error) {
-            console.error('❌ Utloggning misslyckades:', error);
+            console.error('âŒ Utloggning misslyckades:', error);
         }
     }
 
     // Apple Sign-In
     async signInWithApple() {
-        console.log('🍎 Startar Apple Sign-In process...');
+        console.log('ðŸŽ Startar Apple Sign-In process...');
         
         if (!this.isInitialized) {
-            console.error('❌ Firebase inte initialiserat');
+            console.error('âŒ Firebase inte initialiserat');
             if (window.showToast) {
-                window.showToast('Firebase inte initialiserat. Försök igen senare.', 'error');
+                window.showToast('Firebase inte initialiserat. FÃ¶rsÃ¶k igen senare.', 'error');
             }
             return false;
         }
@@ -334,18 +419,18 @@ class FirebaseManager {
             provider.addScope('email');
             provider.addScope('name');
             
-            console.log('🪟 Öppnar Apple Sign-In popup...');
+            console.log('ðŸªŸ Ã–ppnar Apple Sign-In popup...');
             const result = await auth.signInWithPopup(provider);
             
-            console.log('✅ Apple Sign-In framgångsrik:', {
+            console.log('âœ… Apple Sign-In framgÃ¥ngsrik:', {
                 user: result.user.displayName || result.user.email,
                 email: result.user.email,
                 uid: result.user.uid
             });
             
             if (window.showToast) {
-                const displayName = result.user.displayName || result.user.email?.split('@')[0] || 'Apple-användare';
-                window.showToast(`Välkommen ${displayName}! 🍎`, 'success');
+                const displayName = result.user.displayName || result.user.email?.split('@')[0] || 'Apple-anvÃ¤ndare';
+                window.showToast(`VÃ¤lkommen ${displayName}! ðŸŽ`, 'success');
             }
             
             setTimeout(() => {
@@ -355,16 +440,16 @@ class FirebaseManager {
             return true;
             
         } catch (error) {
-            console.error('❌ Apple Sign-In misslyckades:', error);
+            console.error('âŒ Apple Sign-In misslyckades:', error);
             
             let userMessage = 'Apple-inloggning misslyckades. ';
             
             switch (error.code) {
                 case 'auth/popup-closed-by-user':
-                    userMessage += 'Popup stängdes av användaren.';
+                    userMessage += 'Popup stÃ¤ngdes av anvÃ¤ndaren.';
                     break;
                 case 'auth/popup-blocked':
-                    userMessage += 'Popup blockerades av webbläsaren.';
+                    userMessage += 'Popup blockerades av webblÃ¤saren.';
                     break;
                 case 'auth/operation-not-allowed':
                     userMessage += 'Apple Sign-In inte aktiverat.';
@@ -382,24 +467,24 @@ class FirebaseManager {
 
     // Email/Password Sign-In
     async signInWithEmail(email, password) {
-        console.log('📧 Startar Email Sign-In process...');
+        console.log('ðŸ“§ Startar Email Sign-In process...');
         
         if (!this.isInitialized) {
-            console.error('❌ Firebase inte initialiserat');
+            console.error('âŒ Firebase inte initialiserat');
             return false;
         }
         
         try {
             const result = await auth.signInWithEmailAndPassword(email, password);
             
-            console.log('✅ Email Sign-In framgångsrik:', {
+            console.log('âœ… Email Sign-In framgÃ¥ngsrik:', {
                 user: result.user.email,
                 uid: result.user.uid
             });
             
             if (window.showToast) {
-                const displayName = result.user.displayName || result.user.email?.split('@')[0] || 'E-post-användare';
-                window.showToast(`Välkommen ${displayName}! 📧`, 'success');
+                const displayName = result.user.displayName || result.user.email?.split('@')[0] || 'E-post-anvÃ¤ndare';
+                window.showToast(`VÃ¤lkommen ${displayName}! ðŸ“§`, 'success');
             }
             
             setTimeout(() => {
@@ -409,22 +494,22 @@ class FirebaseManager {
             return true;
             
         } catch (error) {
-            console.error('❌ Email Sign-In misslyckades:', error);
+            console.error('âŒ Email Sign-In misslyckades:', error);
             
             let userMessage = 'E-post-inloggning misslyckades. ';
             
             switch (error.code) {
                 case 'auth/user-not-found':
-                    userMessage += 'Ingen användare hittades med denna e-post.';
+                    userMessage += 'Ingen anvÃ¤ndare hittades med denna e-post.';
                     break;
                 case 'auth/wrong-password':
-                    userMessage += 'Fel lösenord.';
+                    userMessage += 'Fel lÃ¶senord.';
                     break;
                 case 'auth/invalid-email':
                     userMessage += 'Ogiltig e-postadress.';
                     break;
                 case 'auth/user-disabled':
-                    userMessage += 'Kontot är inaktiverat.';
+                    userMessage += 'Kontot Ã¤r inaktiverat.';
                     break;
                 default:
                     userMessage += `Fel: ${error.message}`;
@@ -439,23 +524,23 @@ class FirebaseManager {
 
     // Email/Password Registration
     async registerWithEmail(email, password) {
-        console.log('📧 Startar Email Registration process...');
+        console.log('ðŸ“§ Startar Email Registration process...');
         
         if (!this.isInitialized) {
-            console.error('❌ Firebase inte initialiserat');
+            console.error('âŒ Firebase inte initialiserat');
             return false;
         }
         
         try {
             const result = await auth.createUserWithEmailAndPassword(email, password);
             
-            console.log('✅ Email Registration framgångsrik:', {
+            console.log('âœ… Email Registration framgÃ¥ngsrik:', {
                 user: result.user.email,
                 uid: result.user.uid
             });
             
             if (window.showToast) {
-                window.showToast('Konto skapat! Välkommen! 🎉', 'success');
+                window.showToast('Konto skapat! VÃ¤lkommen! ðŸŽ‰', 'success');
             }
             
             setTimeout(() => {
@@ -465,19 +550,19 @@ class FirebaseManager {
             return true;
             
         } catch (error) {
-            console.error('❌ Email Registration misslyckades:', error);
+            console.error('âŒ Email Registration misslyckades:', error);
             
             let userMessage = 'Registrering misslyckades. ';
             
             switch (error.code) {
                 case 'auth/email-already-in-use':
-                    userMessage += 'E-postadressen används redan.';
+                    userMessage += 'E-postadressen anvÃ¤nds redan.';
                     break;
                 case 'auth/invalid-email':
                     userMessage += 'Ogiltig e-postadress.';
                     break;
                 case 'auth/weak-password':
-                    userMessage += 'Lösenordet är för svagt.';
+                    userMessage += 'LÃ¶senordet Ã¤r fÃ¶r svagt.';
                     break;
                 default:
                     userMessage += `Fel: ${error.message}`;
@@ -492,32 +577,32 @@ class FirebaseManager {
 
     // Password Reset
     async resetPassword(email) {
-        console.log('🔑 Startar Password Reset process...');
+        console.log('ðŸ”‘ Startar Password Reset process...');
         
         if (!this.isInitialized) {
-            console.error('❌ Firebase inte initialiserat');
+            console.error('âŒ Firebase inte initialiserat');
             return false;
         }
         
         try {
             await auth.sendPasswordResetEmail(email);
             
-            console.log('✅ Password Reset email skickat');
+            console.log('âœ… Password Reset email skickat');
             
             if (window.showToast) {
-                window.showToast('Återställningslänk skickad till din e-post! 📧', 'success');
+                window.showToast('Ã…terstÃ¤llningslÃ¤nk skickad till din e-post! ðŸ“§', 'success');
             }
             
             return true;
             
         } catch (error) {
-            console.error('❌ Password Reset misslyckades:', error);
+            console.error('âŒ Password Reset misslyckades:', error);
             
-            let userMessage = 'Lösenordsåterställning misslyckades. ';
+            let userMessage = 'LÃ¶senordsÃ¥terstÃ¤llning misslyckades. ';
             
             switch (error.code) {
                 case 'auth/user-not-found':
-                    userMessage += 'Ingen användare hittades med denna e-post.';
+                    userMessage += 'Ingen anvÃ¤ndare hittades med denna e-post.';
                     break;
                 case 'auth/invalid-email':
                     userMessage += 'Ogiltig e-postadress.';
@@ -535,14 +620,14 @@ class FirebaseManager {
 
     async saveUserData(userData) {
         if (!this.isInitialized || !currentUser) {
-            console.log('🚫 Kan inte spara - Firebase inte initialiserat eller användare inte inloggad');
+            console.log('ðŸš« Kan inte spara - Firebase inte initialiserat eller anvÃ¤ndare inte inloggad');
             // Spara lokalt om offline eller inte inloggad
             this.saveLocalBackup(userData);
             return;
         }
 
         try {
-            console.log('💾 Sparar användardata till Firebase:', userData);
+            console.log('ðŸ’¾ Sparar anvÃ¤ndardata till Firebase:', userData);
             
             const userDoc = db.collection('users').doc(currentUser.uid);
             const saveData = {
@@ -554,22 +639,22 @@ class FirebaseManager {
 
             if (this.isOnline) {
                 await userDoc.set(saveData, { merge: true });
-                console.log('✅ Data sparad till Firebase framgångsrikt');
+                console.log('âœ… Data sparad till Firebase framgÃ¥ngsrikt');
                 
                 // Verifiera att datan sparades
                 const doc = await userDoc.get();
                 if (doc.exists) {
-                    console.log('🔍 Verifierad sparad data:', doc.data());
+                    console.log('ðŸ” Verifierad sparad data:', doc.data());
                 }
             } else {
-                console.log('📡 Offline - lägger till i kö för senare synk');
-                // Lägg till i kö för senare synk
+                console.log('ðŸ“¡ Offline - lÃ¤gger till i kÃ¶ fÃ¶r senare synk');
+                // LÃ¤gg till i kÃ¶ fÃ¶r senare synk
                 this.pendingWrites.push({ doc: userDoc, data: saveData });
                 this.saveLocalBackup(userData);
             }
             
         } catch (error) {
-            console.error('❌ Kunde inte spara till Firebase:', error);
+            console.error('âŒ Kunde inte spara till Firebase:', error);
             this.saveLocalBackup(userData);
         }
     }
@@ -586,12 +671,12 @@ class FirebaseManager {
                 const cloudData = userDoc.data();
                 const localData = this.loadLocalBackup();
                 
-                // Slå samman lokal och cloud-data (cloud vinner vid konflikter)
+                // SlÃ¥ samman lokal och cloud-data (cloud vinner vid konflikter)
                 const mergedData = this.mergeUserData(localData, cloudData);
-                console.log('☁️ Data laddad från Firebase');
+                console.log('â˜ï¸ Data laddad frÃ¥n Firebase');
                 return mergedData;
             } else {
-                // Första gången - använd lokal data
+                // FÃ¶rsta gÃ¥ngen - anvÃ¤nd lokal data
                 const localData = this.loadLocalBackup();
                 if (localData && Object.keys(localData).length > 0) {
                     await this.saveUserData(localData);
@@ -600,7 +685,7 @@ class FirebaseManager {
             }
             
         } catch (error) {
-            console.error('❌ Kunde inte ladda från Firebase:', error);
+            console.error('âŒ Kunde inte ladda frÃ¥n Firebase:', error);
             return this.loadLocalBackup();
         }
     }
@@ -612,7 +697,7 @@ class FirebaseManager {
                 lastSaved: Date.now()
             }));
         } catch (error) {
-            console.error('❌ Kunde inte spara lokal backup:', error);
+            console.error('âŒ Kunde inte spara lokal backup:', error);
         }
     }
 
@@ -621,7 +706,7 @@ class FirebaseManager {
             const backup = localStorage.getItem('firebase-backup');
             return backup ? JSON.parse(backup) : null;
         } catch (error) {
-            console.error('❌ Kunde inte ladda lokal backup:', error);
+            console.error('âŒ Kunde inte ladda lokal backup:', error);
             return null;
         }
     }
@@ -630,11 +715,11 @@ class FirebaseManager {
         if (!localData) return cloudData;
         if (!cloudData) return localData;
 
-        // Använd den senast uppdaterade versionen för varje fält
+        // AnvÃ¤nd den senast uppdaterade versionen fÃ¶r varje fÃ¤lt
         return {
             ...localData,
             ...cloudData,
-            // Behåll högsta värden för statistik
+            // BehÃ¥ll hÃ¶gsta vÃ¤rden fÃ¶r statistik
             gameData: {
                 totalGamesPlayed: Math.max(
                     localData.gameData?.totalGamesPlayed || 0,
@@ -657,7 +742,7 @@ class FirebaseManager {
                     cloudData.gameData?.totalPlayTime || 0
                 )
             },
-            // Slå samman achievements
+            // SlÃ¥ samman achievements
             achievements: {
                 ...localData.achievements,
                 ...cloudData.achievements
@@ -669,30 +754,40 @@ class FirebaseManager {
         if (!this.isInitialized || !currentUser) return;
 
         try {
-            // Ladda nuvarande data från molnet
+            // Ladda nuvarande data frÃ¥n molnet
             const cloudData = await this.loadUserData();
+            
+            // VÃ¤nta pÃ¥ att dataManager ska vara tillgÃ¤nglig
+            let attempts = 0;
+            while (!window.dataManager && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
             
             // Samla nuvarande speldata
             const currentData = window.dataManager ? window.dataManager.collectGameData() : {};
             
-            // Slå samman och spara
+            // SlÃ¥ samman och spara
             const mergedData = this.mergeUserData(currentData, cloudData);
             await this.saveUserData(mergedData);
             
             // Uppdatera lokal data med sammanslagen version
-            if (window.dataManager) {
-                window.dataManager.restoreFromData(mergedData);
+            if (window.dataManager && typeof window.dataManager.restoreFromData === 'function') {
+                console.log('ðŸ”„ Ã…terstÃ¤ller data till DataManager...', mergedData);
+                await window.dataManager.restoreFromData(mergedData);
+            } else {
+                console.warn('âš ï¸ DataManager eller restoreFromData metod inte tillgÃ¤nglig');
             }
             
         } catch (error) {
-            console.error('❌ Synkronisering misslyckades:', error);
+            console.error('âŒ Synkronisering misslyckades:', error);
         }
     }
 
     async syncPendingData() {
         if (!this.isOnline || this.pendingWrites.length === 0) return;
 
-        console.log(`🔄 Synkar ${this.pendingWrites.length} väntande skrivningar...`);
+        console.log(`ðŸ”„ Synkar ${this.pendingWrites.length} vÃ¤ntande skrivningar...`);
         
         const writes = [...this.pendingWrites];
         this.pendingWrites = [];
@@ -701,18 +796,26 @@ class FirebaseManager {
             try {
                 await write.doc.set(write.data, { merge: true });
             } catch (error) {
-                console.error('❌ Synk misslyckades:', error);
-                // Lägg tillbaka i kön
+                console.error('âŒ Synk misslyckades:', error);
+                // LÃ¤gg tillbaka i kÃ¶n
                 this.pendingWrites.push(write);
             }
         }
 
         if (this.pendingWrites.length === 0) {
-            console.log('✅ Alla väntande skrivningar synkade');
+            console.log('âœ… Alla vÃ¤ntande skrivningar synkade');
         }
     }
 
     updateUI(isSignedIn) {
+        console.log('ðŸŽ¨ Uppdaterar UI - isSignedIn:', isSignedIn, 'currentUser:', !!currentUser);
+        
+        // FÃ¶rsÃ¶k uppdatera UI direkt och med en kort fÃ¶rdrÃ¶jning fÃ¶r sÃ¤kerhet
+        this.doUpdateUI(isSignedIn);
+        setTimeout(() => this.doUpdateUI(isSignedIn), 100);
+    }
+    
+    doUpdateUI(isSignedIn) {
         const signInBtn = document.getElementById('googleSignIn');
         const signOutBtn = document.getElementById('signOut');
         const loginButton = document.getElementById('loginButton');
@@ -721,15 +824,44 @@ class FirebaseManager {
         const signinHelp = document.getElementById('signin-help-profile'); // Help text
         const userInfo = document.getElementById('userInfo');
         const userInfoMenu = document.getElementById('userInfoMenu');
+        
+        console.log('ðŸ“ Element lookup results:', {
+            signInBtn: !!signInBtn,
+            signOutBtn: !!signOutBtn,
+            loginButton: !!loginButton,
+            registerButton: !!registerButton,
+            authButtons: !!authButtons,
+            signinHelp: !!signinHelp,
+            userInfo: !!userInfo,
+            userInfoMenu: !!userInfoMenu
+        });
 
-        if (signInBtn) signInBtn.style.display = isSignedIn ? 'none' : 'block';
-        if (signOutBtn) signOutBtn.style.display = isSignedIn ? 'block' : 'none';
+        if (signInBtn) {
+            signInBtn.style.display = isSignedIn ? 'none' : 'block';
+            console.log('ðŸ“ Google Sign In button:', isSignedIn ? 'hidden' : 'visible');
+        }
+        if (signOutBtn) {
+            signOutBtn.style.display = isSignedIn ? 'block' : 'none';
+            console.log('ðŸ“ Sign Out button:', isSignedIn ? 'visible' : 'hidden');
+        }
         
         // Handle profile page auth buttons
-        if (loginButton) loginButton.style.display = isSignedIn ? 'none' : 'block';
-        if (registerButton) registerButton.style.display = isSignedIn ? 'none' : 'block';
-        if (authButtons) authButtons.style.display = isSignedIn ? 'none' : 'flex';
-        if (signinHelp) signinHelp.style.display = isSignedIn ? 'none' : 'block';
+        if (loginButton) {
+            loginButton.style.display = isSignedIn ? 'none' : 'block';
+            console.log('ðŸ“ Login button:', isSignedIn ? 'hidden' : 'visible');
+        }
+        if (registerButton) {
+            registerButton.style.display = isSignedIn ? 'none' : 'block';
+            console.log('ðŸ“ Register button:', isSignedIn ? 'hidden' : 'visible');
+        }
+        if (authButtons) {
+            authButtons.style.display = isSignedIn ? 'none' : 'flex';
+            console.log('ðŸ“ Auth buttons container:', isSignedIn ? 'hidden' : 'visible');
+        }
+        if (signinHelp) {
+            signinHelp.style.display = isSignedIn ? 'none' : 'block';
+            console.log('ðŸ“ Sign-in help text:', isSignedIn ? 'hidden' : 'visible');
+        }
         
         // Update profile page userInfo (if it exists)
         if (userInfo && currentUser) {
@@ -755,13 +887,8 @@ class FirebaseManager {
             userInfoMenu.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
         }
         
-        // Trigger profile regeneration after auth state change
-        if (window.showProfile && typeof window.showProfile === 'function') {
-            console.log('🔄 Uppdaterar profil efter auth state change');
-            setTimeout(() => {
-                window.showProfile();
-            }, 500);
-        }
+        // Uppdatera bara UI - visa inte profil automatiskt
+        console.log('âœ… UI uppdaterad fÃ¶r auth state change');
     }
 
     // Achievements system
@@ -782,7 +909,7 @@ class FirebaseManager {
             // Visa achievement notification
             this.showAchievementUnlocked(achievementData);
             
-            console.log(`🏆 Achievement unlocked: ${achievementData.name}`);
+            console.log(`ðŸ† Achievement unlocked: ${achievementData.name}`);
         }
     }
 
@@ -792,13 +919,13 @@ class FirebaseManager {
         modal.innerHTML = `
             <div class="modal-content achievement-content">
                 <div class="achievement-header">
-                    <h2>🏆 Achievement Unlocked!</h2>
+                    <h2>ðŸ† Achievement Unlocked!</h2>
                 </div>
                 <div class="achievement-body">
                     <div class="achievement-icon">${achievement.icon}</div>
                     <h3>${achievement.name}</h3>
                     <p>${achievement.description}</p>
-                    <div class="achievement-points">+${achievement.points} poäng</div>
+                    <div class="achievement-points">+${achievement.points} poÃ¤ng</div>
                 </div>
                 <div class="achievement-footer">
                     <button class="btn btn-primary close-achievement">Awesome!</button>
@@ -818,28 +945,28 @@ class FirebaseManager {
     // Leaderboard funktioner
     async getLeaderboard(limit = 10) {
         if (!this.isInitialized) {
-            console.log('🚫 Firebase inte initialiserat för leaderboard');
+            console.log('ðŸš« Firebase inte initialiserat fÃ¶r leaderboard');
             return [];
         }
 
         try {
-            console.log('🔍 Hämtar leaderboard från Firebase...');
+            console.log('ðŸ” HÃ¤mtar leaderboard frÃ¥n Firebase...');
             
-            // Vi kan inte kombinera where + orderBy på olika fält i Firestore
-            // Så vi hämtar alla användare och filtrerar i JavaScript istället
+            // Vi kan inte kombinera where + orderBy pÃ¥ olika fÃ¤lt i Firestore
+            // SÃ¥ vi hÃ¤mtar alla anvÃ¤ndare och filtrerar i JavaScript istÃ¤llet
             const snapshot = await db.collection('users')
                 .orderBy('gameData.bestScore', 'desc')
-                .limit(50) // Hämta fler för att kompensera för filtrering
+                .limit(50) // HÃ¤mta fler fÃ¶r att kompensera fÃ¶r filtrering
                 .get();
 
-            console.log('📊 Firebase query result:', {
+            console.log('ðŸ“Š Firebase query result:', {
                 size: snapshot.size,
                 docs: snapshot.docs.length
             });
 
             const results = snapshot.docs.map(doc => {
                 const data = doc.data();
-                console.log('👤 User data:', {
+                console.log('ðŸ‘¤ User data:', {
                     id: doc.id,
                     displayName: data.displayName,
                     bestScore: data.gameData?.bestScore,
@@ -854,34 +981,202 @@ class FirebaseManager {
                     bestScoreDetails: data.gameData?.bestScoreDetails || null
                 };
             }).filter(user => {
-                // Filtrera i JavaScript istället för Firestore query
+                // Filtrera i JavaScript istÃ¤llet fÃ¶r Firestore query
                 const isValid = user.bestScore > 0 && user.totalGamesPlayed > 0;
                 if (!isValid) {
-                    console.log('🚫 Filtrerar bort användare:', user);
+                    console.log('ðŸš« Filtrerar bort anvÃ¤ndare:', user);
                 }
                 return isValid;
-            }).slice(0, limit); // Ta bara de första X efter filtrering
+            }).slice(0, limit); // Ta bara de fÃ¶rsta X efter filtrering
 
-            console.log('✅ Slutgiltiga leaderboard resultat:', results);
+            console.log('âœ… Slutgiltiga leaderboard resultat:', results);
             return results;
             
         } catch (error) {
-            console.error('❌ Kunde inte ladda leaderboard:', error);
+            console.error('âŒ Kunde inte ladda leaderboard:', error);
             console.error('Error details:', {
                 code: error.code,
                 message: error.message,
                 stack: error.stack
             });
+            
+            // Hantera specifika fel tyst
+            if (error.code === 'permission-denied') {
+                console.log('â„¹ï¸ Leaderboard krÃ¤ver speciella rÃ¤ttigheter');
+                return [];
+            }
+            
+            // Hantera nÃ¤tverksfel (t.ex. ad-blockers)
+            if (error.message && error.message.includes('ERR_BLOCKED_BY_CLIENT')) {
+                console.log('â„¹ï¸ NÃ¤tverksanrop blockerat (troligen av ad-blocker)');
+                return [];
+            }
+            
             return [];
         }
     }
 
-    // 🔐 ROLLSYSTEM - Admin & Moderator funktioner
+    // ï¿½ PRODUKTHANTERING - Admin & Moderator funktioner
+    async loadProductsFromFirestore() {
+        if (!this.isInitialized) {
+            console.log('ðŸš« Firebase inte initialiserat fÃ¶r produktladdning');
+            return null;
+        }
+
+        try {
+            console.log('ðŸ“¦ Laddar produkter frÃ¥n Firestore...');
+            const snapshot = await db.collection('products').get();
+            
+            if (snapshot.empty) {
+                console.log('ðŸ“¦ Inga produkter i Firestore, anvÃ¤nder lokal JSON');
+                return null;
+            }
+
+            const products = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                products.push({
+                    id: doc.id,
+                    ...data
+                });
+            });
+
+            console.log(`âœ… Laddade ${products.length} produkter frÃ¥n Firestore`);
+            return products;
+
+        } catch (error) {
+            console.error('âŒ Kunde inte ladda produkter frÃ¥n Firestore:', error);
+            if (error.code === 'permission-denied') {
+                console.log('â„¹ï¸ Produkter krÃ¤ver speciella rÃ¤ttigheter, anvÃ¤nder lokal JSON');
+            }
+            return null;
+        }
+    }
+
+    async addProduct(productData) {
+        if (!this.isInitialized) {
+            console.log('ðŸš« Firebase inte initialiserat');
+            return false;
+        }
+
+        if (!this.isModerator && !this.isAdmin) {
+            console.log('ðŸš« BehÃ¶ver moderator-rÃ¤ttigheter fÃ¶r att lÃ¤gga till produkter');
+            return false;
+        }
+
+        try {
+            console.log('âž• LÃ¤gger till ny produkt:', productData);
+            
+            const docRef = await db.collection('products').add({
+                ...productData,
+                createdAt: Date.now(),
+                createdBy: currentUser?.uid || 'unknown',
+                modifiedAt: Date.now(),
+                modifiedBy: currentUser?.uid || 'unknown'
+            });
+
+            console.log('âœ… Produkt tillagd med ID:', docRef.id);
+            return docRef.id;
+
+        } catch (error) {
+            console.error('âŒ Kunde inte lÃ¤gga till produkt:', error);
+            return false;
+        }
+    }
+
+    async updateProduct(productId, updates) {
+        if (!this.isInitialized) {
+            console.log('ðŸš« Firebase inte initialiserat');
+            return false;
+        }
+
+        if (!this.isModerator && !this.isAdmin) {
+            console.log('ðŸš« BehÃ¶ver moderator-rÃ¤ttigheter fÃ¶r att uppdatera produkter');
+            return false;
+        }
+
+        try {
+            console.log('ðŸ“ Uppdaterar produkt:', productId, updates);
+            
+            await db.collection('products').doc(productId).update({
+                ...updates,
+                modifiedAt: Date.now(),
+                modifiedBy: currentUser?.uid || 'unknown'
+            });
+
+            console.log('âœ… Produkt uppdaterad');
+            return true;
+
+        } catch (error) {
+            console.error('âŒ Kunde inte uppdatera produkt:', error);
+            return false;
+        }
+    }
+
+    async deleteProduct(productId) {
+        if (!this.isInitialized) {
+            console.log('ðŸš« Firebase inte initialiserat');
+            return false;
+        }
+
+        if (!this.isAdmin) {
+            console.log('ðŸš« BehÃ¶ver admin-rÃ¤ttigheter fÃ¶r att ta bort produkter');
+            return false;
+        }
+
+        try {
+            console.log('ðŸ—‘ï¸ Tar bort produkt:', productId);
+            await db.collection('products').doc(productId).delete();
+            console.log('âœ… Produkt borttagen');
+            return true;
+
+        } catch (error) {
+            console.error('âŒ Kunde inte ta bort produkt:', error);
+            return false;
+        }
+    }
+
+    async importProductsFromJSON(jsonData) {
+        if (!this.isInitialized) {
+            console.log('ðŸš« Firebase inte initialiserat');
+            return false;
+        }
+
+        if (!this.isAdmin) {
+            console.log('ðŸš« BehÃ¶ver admin-rÃ¤ttigheter fÃ¶r att importera produkter');
+            return false;
+        }
+
+        try {
+            console.log('ðŸ“¥ Importerar produkter frÃ¥n JSON...');
+            let importCount = 0;
+
+            for (const product of jsonData) {
+                await db.collection('products').add({
+                    ...product,
+                    createdAt: Date.now(),
+                    createdBy: currentUser?.uid || 'import',
+                    modifiedAt: Date.now(),
+                    modifiedBy: currentUser?.uid || 'import'
+                });
+                importCount++;
+            }
+
+            console.log(`âœ… Importerade ${importCount} produkter`);
+            return importCount;
+
+        } catch (error) {
+            console.error('âŒ Kunde inte importera produkter:', error);
+            return false;
+        }
+    }
+
+    // ï¿½ðŸ” ROLLSYSTEM - Admin & Moderator funktioner
     async checkUserRole(user) {
         if (!this.isInitialized || !user) return;
 
         try {
-            // Kontrollera om användaren har en roll i databasen
+            // Kontrollera om anvÃ¤ndaren har en roll i databasen
             const roleDoc = await db.collection('userRoles').doc(user.uid).get();
             
             if (roleDoc.exists) {
@@ -890,26 +1185,26 @@ class FirebaseManager {
                 this.isAdmin = this.userRole === 'admin';
                 this.isModerator = this.userRole === 'moderator' || this.isAdmin;
                 
-                console.log('👑 Användarroll laddad:', {
+                console.log('ðŸ‘‘ AnvÃ¤ndarroll laddad:', {
                     role: this.userRole,
                     isAdmin: this.isAdmin,
                     isModerator: this.isModerator
                 });
             } else {
-                // Första gången för denna användare - ge user-roll
+                // FÃ¶rsta gÃ¥ngen fÃ¶r denna anvÃ¤ndare - ge user-roll
                 await this.setUserRole(user.uid, 'user');
                 this.userRole = 'user';
                 this.isAdmin = false;
                 this.isModerator = false;
                 
-                console.log('👤 Ny användare - satt som user');
+                console.log('ðŸ‘¤ Ny anvÃ¤ndare - satt som user');
             }
             
-            // Uppdatera UI baserat på roll
+            // Uppdatera UI baserat pÃ¥ roll
             this.updateRoleUI();
             
         } catch (error) {
-            console.error('❌ Kunde inte kontrollera användarroll:', error);
+            console.error('âŒ Kunde inte kontrollera anvÃ¤ndarroll:', error);
             // Fallback till user
             this.userRole = 'user';
             this.isAdmin = false;
@@ -920,12 +1215,12 @@ class FirebaseManager {
     async setUserRole(userId, newRole) {
         if (!this.isInitialized) return false;
         
-        // Första användaren blir automatiskt admin, annars kräv admin-rättigheter
+        // FÃ¶rsta anvÃ¤ndaren blir automatiskt admin, annars krÃ¤v admin-rÃ¤ttigheter
         const isFirstUser = !currentUser && newRole === 'user';
         if (!isFirstUser && !this.isAdmin && newRole !== 'user') {
-            console.error('❌ Endast admin kan sätta moderator/admin roller');
+            console.error('âŒ Endast admin kan sÃ¤tta moderator/admin roller');
             if (window.showToast) {
-                window.showToast('Endast admin kan sätta roller', 'error');
+                window.showToast('Endast admin kan sÃ¤tta roller', 'error');
             }
             return false;
         }
@@ -941,7 +1236,7 @@ class FirebaseManager {
 
             await db.collection('userRoles').doc(userId).set(roleData, { merge: true });
             
-            // Logga rolländringen (om inte första användaren)
+            // Logga rollÃ¤ndringen (om inte fÃ¶rsta anvÃ¤ndaren)
             if (currentUser) {
                 await db.collection('roleChanges').add({
                     targetUserId: userId,
@@ -952,16 +1247,16 @@ class FirebaseManager {
                 });
             }
 
-            console.log(`✅ Användarroll uppdaterad: ${userId} → ${newRole}`);
+            console.log(`âœ… AnvÃ¤ndarroll uppdaterad: ${userId} â†’ ${newRole}`);
             
             if (window.showToast) {
-                window.showToast(`Användarroll uppdaterad till ${newRole}`, 'success');
+                window.showToast(`AnvÃ¤ndarroll uppdaterad till ${newRole}`, 'success');
             }
             
             return true;
             
         } catch (error) {
-            console.error('❌ Kunde inte sätta användarroll:', error);
+            console.error('âŒ Kunde inte sÃ¤tta anvÃ¤ndarroll:', error);
             if (window.showToast) {
                 window.showToast('Kunde inte uppdatera roll', 'error');
             }
@@ -973,25 +1268,25 @@ class FirebaseManager {
         if (!this.isInitialized || !this.isModerator) return [];
 
         try {
-            // Hämta bara rolldata - inte användardata från users-kollektionen
-            // eftersom säkerhetsreglerna blockerar det
+            // HÃ¤mta bara rolldata - inte anvÃ¤ndardata frÃ¥n users-kollektionen
+            // eftersom sÃ¤kerhetsreglerna blockerar det
             const rolesSnapshot = await db.collection('userRoles').get();
             const authUsersSnapshot = await db.collection('users').get();
             
             const allUsers = [];
             
-            // Kombinera data från båda kollektionerna
+            // Kombinera data frÃ¥n bÃ¥da kollektionerna
             rolesSnapshot.docs.forEach(roleDoc => {
                 const roleData = roleDoc.data();
                 const userId = roleDoc.id;
                 
-                // Hitta motsvarande användardata
+                // Hitta motsvarande anvÃ¤ndardata
                 const userDoc = authUsersSnapshot.docs.find(doc => doc.id === userId);
                 const userData = userDoc ? userDoc.data() : {};
                 
                 allUsers.push({
                     uid: userId,
-                    displayName: userData.displayName || roleData.setByName || 'Okänd användare',
+                    displayName: userData.displayName || roleData.setByName || 'OkÃ¤nd anvÃ¤ndare',
                     email: userData.email || 'Ingen e-post',
                     lastActive: userData.lastUpdated || roleData.setAt,
                     gameStats: userData.gameData || {},
@@ -1001,22 +1296,22 @@ class FirebaseManager {
                 });
             });
             
-            // Sortera: admin först, sedan moderator, sedan user
+            // Sortera: admin fÃ¶rst, sedan moderator, sedan user
             return allUsers.sort((a, b) => {
                 const roleOrder = { admin: 3, moderator: 2, user: 1 };
                 return roleOrder[b.role] - roleOrder[a.role];
             });
             
         } catch (error) {
-            console.error('❌ Kunde inte hämta användarlista:', error);
+            console.error('âŒ Kunde inte hÃ¤mta anvÃ¤ndarlista:', error);
             
-            // Fallback - försök bara hämta roller
+            // Fallback - fÃ¶rsÃ¶k bara hÃ¤mta roller
             try {
                 const rolesSnapshot = await db.collection('userRoles').get();
                 const basicUsers = rolesSnapshot.docs.map(doc => ({
                     uid: doc.id,
-                    displayName: doc.data().setByName || 'Användare',
-                    email: 'Ej tillgänglig',
+                    displayName: doc.data().setByName || 'AnvÃ¤ndare',
+                    email: 'Ej tillgÃ¤nglig',
                     role: doc.data().role || 'user',
                     isCurrentUser: doc.id === currentUser.uid,
                     photoURL: null,
@@ -1024,14 +1319,14 @@ class FirebaseManager {
                     gameStats: {}
                 }));
                 
-                console.log('⚠️ Använder grundläggande användardata');
+                console.log('âš ï¸ AnvÃ¤nder grundlÃ¤ggande anvÃ¤ndardata');
                 return basicUsers.sort((a, b) => {
                     const roleOrder = { admin: 3, moderator: 2, user: 1 };
                     return roleOrder[b.role] - roleOrder[a.role];
                 });
                 
             } catch (fallbackError) {
-                console.error('❌ Även fallback misslyckades:', fallbackError);
+                console.error('âŒ Ã„ven fallback misslyckades:', fallbackError);
                 return [];
             }
         }
@@ -1040,14 +1335,14 @@ class FirebaseManager {
     async promoteToModerator(userId, userName) {
         if (!this.isAdmin) {
             if (window.showToast) {
-                window.showToast('Endast admin kan sätta moderatorer', 'error');
+                window.showToast('Endast admin kan sÃ¤tta moderatorer', 'error');
             }
             return false;
         }
         
         const success = await this.setUserRole(userId, 'moderator');
         if (success && window.showToast) {
-            window.showToast(`${userName} är nu moderator! 👑`, 'success');
+            window.showToast(`${userName} Ã¤r nu moderator! ðŸ‘‘`, 'success');
         }
         return success;
     }
@@ -1062,13 +1357,13 @@ class FirebaseManager {
         
         const success = await this.setUserRole(userId, 'user');
         if (success && window.showToast) {
-            window.showToast(`${userName} är nu vanlig användare`, 'info');
+            window.showToast(`${userName} Ã¤r nu vanlig anvÃ¤ndare`, 'info');
         }
         return success;
     }
 
     updateRoleUI() {
-        // Uppdatera UI baserat på användarens roll
+        // Uppdatera UI baserat pÃ¥ anvÃ¤ndarens roll
         const adminElements = document.querySelectorAll('.admin-only');
         const moderatorElements = document.querySelectorAll('.moderator-only');
         
@@ -1080,13 +1375,13 @@ class FirebaseManager {
             el.style.display = this.isModerator ? 'block' : 'none';
         });
         
-        // Lägg till rollbadge i användarinfo
+        // LÃ¤gg till rollbadge i anvÃ¤ndarinfo
         const userInfo = document.getElementById('userInfo');
         const userInfoMenu = document.getElementById('userInfoMenu');
         
         if (userInfo && currentUser) {
-            const roleEmoji = this.isAdmin ? '👑' : this.isModerator ? '🛡️' : '👤';
-            const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'Användare';
+            const roleEmoji = this.isAdmin ? 'ðŸ‘‘' : this.isModerator ? 'ðŸ›¡ï¸' : 'ðŸ‘¤';
+            const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'AnvÃ¤ndare';
             
             userInfo.innerHTML = `
                 <div class="user-profile">
@@ -1098,8 +1393,8 @@ class FirebaseManager {
         }
         
         if (userInfoMenu && currentUser) {
-            const roleEmoji = this.isAdmin ? '👑' : this.isModerator ? '🛡️' : '👤';
-            const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'Användare';
+            const roleEmoji = this.isAdmin ? 'ðŸ‘‘' : this.isModerator ? 'ðŸ›¡ï¸' : 'ðŸ‘¤';
+            const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'AnvÃ¤ndare';
             userInfoMenu.innerHTML = `
                 <div class="user-profile">
                     <img src="${currentUser.photoURL}" alt="Profil" class="profile-img">
@@ -1124,34 +1419,88 @@ class FirebaseManager {
     }
 }
 
+// Globala funktioner fÃ¶r UI-uppdatering
+window.updateAuthUI = function() {
+    if (window.firebaseManager) {
+        const isSignedIn = !!window.firebaseManager.currentUser;
+        console.log('ðŸ”„ Manuell auth UI uppdatering:', isSignedIn);
+        window.firebaseManager.updateUI(isSignedIn);
+    }
+};
+
+// Uppdatera bara anvÃ¤ndarnamnet i profilen (utan att bygga om hela profilen)
+window.updateProfileUserName = function() {
+    if (!window.firebaseManager) return;
+    
+    const playerName = window.firebaseManager.currentUserName;
+    console.log('ðŸ‘¤ Uppdaterar profilnamn till:', playerName);
+    
+    // Uppdatera spelarnamn i profil header
+    const playerInfoElement = document.querySelector('.player-info h3');
+    if (playerInfoElement) {
+        playerInfoElement.textContent = playerName;
+        console.log('âœ… Profilnamn uppdaterat i header');
+    }
+    
+    // Uppdatera anvÃ¤ndarinfo-sektioner
+    const userInfo = document.getElementById('userInfo');
+    const userInfoMenu = document.getElementById('userInfoMenu');
+    const currentUser = window.firebaseManager.currentUser;
+    
+    if (userInfo && currentUser) {
+        userInfo.innerHTML = `
+            <div class="user-profile">
+                <img src="${currentUser.photoURL}" alt="Profil" class="profile-img">
+                <span>Inloggad som ${currentUser.displayName}</span>
+            </div>
+        `;
+        console.log('âœ… userInfo uppdaterat');
+    } else if (userInfo) {
+        userInfo.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
+    }
+    
+    if (userInfoMenu && currentUser) {
+        userInfoMenu.innerHTML = `
+            <div class="user-profile">
+                <img src="${currentUser.photoURL}" alt="Profil" class="profile-img">
+                <span>Inloggad som ${currentUser.displayName}</span>
+            </div>
+        `;
+        console.log('âœ… userInfoMenu uppdaterat');
+    } else if (userInfoMenu) {
+        userInfoMenu.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
+    }
+};
+
 // Initiera Firebase Manager globalt
+window.FirebaseManager = FirebaseManager; // Exportera klassen ocksÃ¥
 window.firebaseManager = new FirebaseManager();
 
 // Setup authentication button event listeners
 function setupAuthButtons() {
-    console.log('🔗 Setting up main auth buttons...');
+    console.log('ðŸ”— Setting up main auth buttons...');
     
     // Main auth buttons
     const loginBtn = document.getElementById('loginButton');
     if (loginBtn) {
-        console.log('✅ Login button found, adding event listener');
+        console.log('âœ… Login button found, adding event listener');
         loginBtn.addEventListener('click', () => {
-            console.log('👆 Login button clicked');
+            console.log('ðŸ‘† Login button clicked');
             openAuthProviderModal();
         });
     } else {
-        console.log('❌ Login button not found');
+        console.log('âŒ Login button not found');
     }
     
     const registerBtn = document.getElementById('registerButton');
     if (registerBtn) {
-        console.log('✅ Register button found, adding event listener');
+        console.log('âœ… Register button found, adding event listener');
         registerBtn.addEventListener('click', () => {
-            console.log('👆 Register button clicked');
+            console.log('ðŸ‘† Register button clicked');
             openRegisterModal();
         });
     } else {
-        console.log('❌ Register button not found');
+        console.log('âŒ Register button not found');
     }
 
 // Make setupAuthButtons globally available
@@ -1168,13 +1517,13 @@ window.setupAuthButtons = setupAuthButtons;
 
 // Register modal functions
 function openRegisterModal() {
-    console.log('🚪 Opening register modal...');
+    console.log('ðŸšª Opening register modal...');
     const modal = document.getElementById('registerModal');
     if (modal) {
-        console.log('✅ Register modal found, showing...');
+        console.log('âœ… Register modal found, showing...');
         modal.classList.remove('hidden');
     } else {
-        console.log('❌ Register modal not found!');
+        console.log('âŒ Register modal not found!');
     }
 }
 
@@ -1187,12 +1536,12 @@ function closeRegisterModal() {
 
 // Register functions called from register modal
 async function registerWithGoogle() {
-    console.log('🔗 registerWithGoogle funktionen kallad');
+    console.log('ðŸ”— registerWithGoogle funktionen kallad');
     closeRegisterModal();
     
     // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        console.log('â³ Firebase Manager inte tillgÃ¤ngligt Ã¤n, vÃ¤ntar...');
         for (let i = 0; i < 50; i++) {
             await new Promise(resolve => setTimeout(resolve, 100));
             if (window.firebaseManager) break;
@@ -1200,22 +1549,22 @@ async function registerWithGoogle() {
     }
     
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
-        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
+        console.error('âŒ Firebase Manager inte tillgÃ¤ngligt efter vÃ¤ntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. FÃ¶rsÃ¶k igen.', 'error');
         return;
     }
     
-    console.log('🔥 Anropar firebaseManager.signInWithGoogle...');
+    console.log('ðŸ”¥ Anropar firebaseManager.signInWithGoogle...');
     await window.firebaseManager.signInWithGoogle();
 }
 
 async function registerWithApple() {
-    console.log('🔗 registerWithApple funktionen kallad');
+    console.log('ðŸ”— registerWithApple funktionen kallad');
     closeRegisterModal();
     
     // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        console.log('â³ Firebase Manager inte tillgÃ¤ngligt Ã¤n, vÃ¤ntar...');
         for (let i = 0; i < 50; i++) {
             await new Promise(resolve => setTimeout(resolve, 100));
             if (window.firebaseManager) break;
@@ -1223,12 +1572,12 @@ async function registerWithApple() {
     }
     
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
-        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
+        console.error('âŒ Firebase Manager inte tillgÃ¤ngligt efter vÃ¤ntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. FÃ¶rsÃ¶k igen.', 'error');
         return;
     }
     
-    console.log('🔥 Anropar firebaseManager.signInWithApple...');
+    console.log('ðŸ”¥ Anropar firebaseManager.signInWithApple...');
     await window.firebaseManager.signInWithApple();
 }
 
@@ -1249,13 +1598,13 @@ function switchToLogin() {
 
 // Provider selection modal functions
 function openAuthProviderModal() {
-    console.log('🚪 Opening auth provider modal...');
+    console.log('ðŸšª Opening auth provider modal...');
     const modal = document.getElementById('authProviderModal');
     if (modal) {
-        console.log('✅ Auth modal found, showing...');
+        console.log('âœ… Auth modal found, showing...');
         modal.classList.remove('hidden');
     } else {
-        console.log('❌ Auth modal not found!');
+        console.log('âŒ Auth modal not found!');
     }
 }
 
@@ -1268,12 +1617,12 @@ function closeAuthModal() {
 
 // Provider functions called from modal
 async function signInWithGoogle() {
-    console.log('🔗 signInWithGoogle funktionen kallad');
+    console.log('ðŸ”— signInWithGoogle funktionen kallad');
     closeAuthModal();
     
     // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        console.log('â³ Firebase Manager inte tillgÃ¤ngligt Ã¤n, vÃ¤ntar...');
         // Wait up to 5 seconds for Firebase to initialize
         for (let i = 0; i < 50; i++) {
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -1282,22 +1631,22 @@ async function signInWithGoogle() {
     }
     
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
-        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
+        console.error('âŒ Firebase Manager inte tillgÃ¤ngligt efter vÃ¤ntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. FÃ¶rsÃ¶k igen.', 'error');
         return;
     }
     
-    console.log('🔥 Anropar firebaseManager.signInWithGoogle...');
+    console.log('ðŸ”¥ Anropar firebaseManager.signInWithGoogle...');
     await window.firebaseManager.signInWithGoogle();
 }
 
 async function signInWithApple() {
-    console.log('🔗 signInWithApple funktionen kallad');
+    console.log('ðŸ”— signInWithApple funktionen kallad');
     closeAuthModal();
     
     // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        console.log('â³ Firebase Manager inte tillgÃ¤ngligt Ã¤n, vÃ¤ntar...');
         for (let i = 0; i < 50; i++) {
             await new Promise(resolve => setTimeout(resolve, 100));
             if (window.firebaseManager) break;
@@ -1305,12 +1654,12 @@ async function signInWithApple() {
     }
     
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
-        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
+        console.error('âŒ Firebase Manager inte tillgÃ¤ngligt efter vÃ¤ntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. FÃ¶rsÃ¶k igen.', 'error');
         return;
     }
     
-    console.log('🔥 Anropar firebaseManager.signInWithApple...');
+    console.log('ðŸ”¥ Anropar firebaseManager.signInWithApple...');
     await window.firebaseManager.signInWithApple();
 }
 
@@ -1415,7 +1764,7 @@ async function handleEmailSignIn(event) {
     const password = document.getElementById('signin-password')?.value;
     
     if (!email || !password) {
-        showEmailMessage('Vänligen fyll i alla fält.', 'error');
+        showEmailMessage('VÃ¤nligen fyll i alla fÃ¤lt.', 'error');
         return;
     }
     
@@ -1437,17 +1786,17 @@ async function handleEmailSignUp(event) {
     const confirm = document.getElementById('signup-confirm')?.value;
     
     if (!email || !password || !confirm) {
-        showEmailMessage('Vänligen fyll i alla fält.', 'error');
+        showEmailMessage('VÃ¤nligen fyll i alla fÃ¤lt.', 'error');
         return;
     }
     
     if (password !== confirm) {
-        showEmailMessage('Lösenorden matchar inte.', 'error');
+        showEmailMessage('LÃ¶senorden matchar inte.', 'error');
         return;
     }
     
     if (password.length < 6) {
-        showEmailMessage('Lösenordet måste vara minst 6 tecken.', 'error');
+        showEmailMessage('LÃ¶senordet mÃ¥ste vara minst 6 tecken.', 'error');
         return;
     }
     
@@ -1467,15 +1816,15 @@ async function handleForgotPassword(event) {
     const email = document.getElementById('forgot-email')?.value;
     
     if (!email) {
-        showEmailMessage('Vänligen ange din e-postadress.', 'error');
+        showEmailMessage('VÃ¤nligen ange din e-postadress.', 'error');
         return;
     }
     
-    showEmailMessage('Skickar återställningslänk...', 'info');
+    showEmailMessage('Skickar Ã¥terstÃ¤llningslÃ¤nk...', 'info');
     
     const success = await window.firebaseManager.resetPassword(email);
     if (success) {
-        showEmailMessage('Återställningslänk skickad! Kontrollera din e-post.', 'success');
+        showEmailMessage('Ã…terstÃ¤llningslÃ¤nk skickad! Kontrollera din e-post.', 'success');
         setTimeout(() => {
             showEmailTab('signin');
         }, 3000);
@@ -1484,7 +1833,7 @@ async function handleForgotPassword(event) {
     }
 }
 
-// Keyboard navigation för modaler
+// Keyboard navigation fÃ¶r modaler
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         const authModal = document.getElementById('authProviderModal');
@@ -1528,32 +1877,32 @@ document.addEventListener('click', (event) => {
 
 // Modal button event listeners - setup after DOM loads
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🔗 Setting up modal event listeners...');
+    console.log('ðŸ”— Setting up modal event listeners...');
     
     // Google sign-in buttons  
     const googleSignInBtn = document.getElementById('googleSignInBtn');
     const googleRegisterBtn = document.getElementById('googleRegisterBtn');
     
     if (googleSignInBtn) {
-        console.log('✅ Google Sign-In button found, adding event listener');
+        console.log('âœ… Google Sign-In button found, adding event listener');
         googleSignInBtn.addEventListener('click', (e) => {
-            console.log('👆 Google Sign-In button clicked');
+            console.log('ðŸ‘† Google Sign-In button clicked');
             e.preventDefault();
             signInWithGoogle();
         });
     } else {
-        console.log('❌ Google Sign-In button not found');
+        console.log('âŒ Google Sign-In button not found');
     }
     
     if (googleRegisterBtn) {
-        console.log('✅ Google Register button found, adding event listener');
+        console.log('âœ… Google Register button found, adding event listener');
         googleRegisterBtn.addEventListener('click', (e) => {
-            console.log('👆 Google Register button clicked');
+            console.log('ðŸ‘† Google Register button clicked');
             e.preventDefault();
             registerWithGoogle();
         });
     } else {
-        console.log('❌ Google Register button not found');
+        console.log('âŒ Google Register button not found');
     }
     
     // Apple sign-in buttons
@@ -1561,26 +1910,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const appleRegisterBtn = document.getElementById('appleRegisterBtn');
     
     if (appleSignInBtn) {
-        console.log('✅ Apple Sign-In button found, adding event listener');
+        console.log('âœ… Apple Sign-In button found, adding event listener');
         appleSignInBtn.addEventListener('click', (e) => {
-            console.log('👆 Apple Sign-In button clicked');
+            console.log('ðŸ‘† Apple Sign-In button clicked');
             e.preventDefault();
             signInWithApple();
         });
     } else {
-        console.log('❌ Apple Sign-In button not found');
+        console.log('âŒ Apple Sign-In button not found');
     }
     
     if (appleRegisterBtn) {
-        console.log('✅ Apple Register button found, adding event listener');
+        console.log('âœ… Apple Register button found, adding event listener');
         appleRegisterBtn.addEventListener('click', (e) => {
-            console.log('👆 Apple Register button clicked');
+            console.log('ðŸ‘† Apple Register button clicked');
             e.preventDefault();
             registerWithApple();
         });
     } else {
-        console.log('❌ Apple Register button not found');
+        console.log('âŒ Apple Register button not found');
     }
     
-    console.log('🔗 Modal event listeners setup complete');
+    console.log('ðŸ”— Modal event listeners setup complete');
 });

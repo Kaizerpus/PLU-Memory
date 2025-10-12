@@ -730,7 +730,8 @@ h1::after {
 }
 
 /* Styling för produktbilder i det nya spelläget */
-.product-image {
+.game-area .product-image,
+.vegetable-image {
     /* Mindre storlek för bättre användarupplevelse */
     width: min(250px, 40vw);
     height: min(250px, 40vw);
@@ -7112,5 +7113,376 @@ button:not(.special-button)::after {
         line-height: 1.4;
         margin-top: 8px;
         color: var(--text-secondary);
+    }
+}
+
+/* 🔧 ADMIN & MODERATOR STYLING */
+.admin-section {
+    margin-top: 24px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #007bff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+}
+
+.admin-header h3 {
+    color: #007bff;
+    margin: 0 0 8px 0;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-header p {
+    margin: 0 0 16px 0;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.admin-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.admin-buttons .btn {
+    font-size: 0.9em;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.admin-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Produkthantering modal */
+.product-management-modal .modal-content {
+    max-width: 900px;
+    max-height: 95vh;
+    min-height: 80vh;
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.product-management-modal .modal-body {
+    max-height: calc(95vh - 120px); /* Subtrahera header-höjd */
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: calc(95vh - 120px); /* Använd full höjd */
+}
+
+.product-actions {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0; /* Förhindra krympning */
+}
+
+.products-list {
+    flex: 1; /* Ta upp all tillgänglig plats */
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Tillåt flexbox att krympa */
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px; /* Öka från 16px till 20px */
+    margin-top: 16px;
+    flex: 1; /* Ta upp all tillgänglig plats */
+    overflow-y: auto;
+    padding: 16px; /* Öka från 12px till 16px */
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+    min-height: 300px; /* Minimum höjd för bättre UX */
+}
+
+.product-item {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    min-height: 180px; /* Öka från 160px till 180px */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.product-info {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px; /* Öka från 10px */
+    flex: 1;
+    min-height: 80px; /* Säkerställ minsta höjd för innehållet */
+}
+
+.product-management-modal .product-image,
+.products-grid .product-image {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    flex-shrink: 0;
+    margin: 0;
+    display: block;
+}
+
+.product-details {
+    flex: 1;
+    min-width: 0; /* Förhindra overflow */
+}
+
+.product-details h4 {
+    margin: 0 0 6px 0;
+    color: #333;
+    font-size: 1em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-details p {
+    margin: 2px 0;
+    font-size: 0.8em;
+    color: #666;
+    line-height: 1.3;
+}
+
+.product-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: 8px; /* Återställ till 8px */
+    padding-top: 8px; /* Återställ till 8px */
+    border-top: 1px solid #eee; /* Subtil separator */
+    flex-shrink: 0; /* Förhindra krympning */
+}
+
+.product-actions .btn {
+    font-size: 0.75em;
+    padding: 4px 8px;
+    min-width: 50px;
+    flex-shrink: 0;
+}
+
+/* Produktdialog */
+.product-dialog-modal .modal-content {
+    max-width: 900px; /* Öka från 700px till 900px */
+    width: 90vw; /* Använd 90% av viewport-bredden */
+    max-height: 95vh; /* Öka från 90vh till 95vh */
+    min-height: 600px; /* Lägg till minimum höjd */
+    height: 95vh; /* Använd fast höjd för att fylla hela ytan */
+    overflow-y: auto; /* Lägg till scrollning om behövs */
+    display: flex;
+    flex-direction: column;
+}
+
+.product-dialog-modal .modal-body {
+    flex: 1; /* Ta upp all tillgänglig plats */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px; /* Öka från 20px för mer luft */
+    padding: 30px; /* Öka från 20px för större form */
+    flex: 1; /* Ta upp all tillgänglig plats */
+    justify-content: flex-start; /* Börja från toppen */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Öka från 8px */
+    margin-bottom: 8px; /* Lägg till margin för mer separation */
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.2em; /* Öka från 1.1em */
+    margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 18px 24px; /* Öka från 16px 20px */
+    border: 1px solid #dee2e6;
+    border-radius: 8px; /* Öka från 6px */
+    font-size: 1.2em; /* Öka från 1.1em */
+    transition: border-color 0.3s ease;
+    min-height: 56px; /* Öka från 52px för bättre touch targets */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 16px; /* Öka från 8px */
+    padding-top: 16px; /* Lägg till padding */
+    border-top: 1px solid #eee; /* Lägg till separator */
+}
+
+/* Kategori input group */
+.category-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.category-input-group select {
+    flex: 1;
+}
+
+.category-input-group .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Kategori dialog */
+.category-dialog-modal .modal-content {
+    max-width: 500px;
+}
+
+
+
+.current-image-preview img {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+.current-image-preview img:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+/* Import dialog */
+.import-dialog-modal .modal-content {
+    max-width: 500px;
+}
+
+.file-input-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 16px 0;
+}
+
+.file-input {
+    flex: 1;
+    padding: 8px;
+    border: 2px dashed #dee2e6;
+    border-radius: 6px;
+    background: #f8f9fa;
+}
+
+.import-preview {
+    margin-top: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+/* Loading och error states */
+.products-list .loading {
+    text-align: center;
+    padding: 60px 40px;
+    color: #6c757d;
+    font-style: italic;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+}
+
+.products-list .no-products,
+.products-list .error {
+    text-align: center;
+    padding: 60px 40px;
+    color: #dc3545;
+    background: #f8d7da;
+    border-radius: 6px;
+    margin: 16px 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    flex-direction: column;
+}
+
+.products-list .no-products {
+    color: #856404;
+    background: #fff3cd;
+}
+
+/* Responsiv design för admin */
+@media (max-width: 768px) {
+    .admin-buttons {
+        flex-direction: column;
+    }
+    
+    .admin-buttons .btn {
+        width: 100%;
+    }
+    
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .product-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .product-actions {
+        justify-content: center;
+    }
+    
+    .file-input-group {
+        flex-direction: column;
+    }
+    
+    .form-actions {
+        flex-direction: column;
     }
 }

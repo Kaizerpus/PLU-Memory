@@ -1878,16 +1878,9 @@ class BackupManager {
     }
 
     async checkForDataRecovery() {
-        // Kontrollera om användaren har förlorat data och kan återställa
-        const currentData = dataManager.collectGameData();
-        const hasSignificantData = currentData.gameData.totalGamesPlayed > 0;
-        
-        if (!hasSignificantData) {
-            const availableBackups = this.getAvailableBackups();
-            if (availableBackups.length > 0) {
-                this.offerDataRecovery(availableBackups);
-            }
-        }
+        // Funktion inaktiverad för att undvika irriterande popups
+        console.log('Data recovery check disabled to prevent annoying popups');
+        return;
     }
 
     getAvailableBackups() {
@@ -1910,44 +1903,8 @@ class BackupManager {
     }
 
     async showRecoveryDialog(backups) {
-        return new Promise((resolve) => {
-            const modal = document.createElement('div');
-            modal.className = 'modal show';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>🔄 Återställa data?</h2>
-                    </div>
-                    <div class="modal-body">
-                        <p>Vi hittade automatiska backups av din speldata. Vill du återställa?</p>
-                        <div class="backup-list">
-                            ${backups.map(backup => `
-                                <div class="backup-item">
-                                    <span>📁 Backup från ${backup.date}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <p class="note">Detta kommer inte att ta bort någon nuvarande data.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary decline-recovery">Nej tack</button>
-                        <button class="btn btn-primary accept-recovery">Återställ</button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            modal.querySelector('.decline-recovery').onclick = () => {
-                modal.remove();
-                resolve(false);
-            };
-
-            modal.querySelector('.accept-recovery').onclick = () => {
-                modal.remove();
-                resolve(true);
-            };
-        });
+        // Funktion inaktiverad för att undvika irriterande popups
+        return false;
     }
 
     async restoreFromBackup(backupKey) {

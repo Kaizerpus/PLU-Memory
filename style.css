@@ -4951,6 +4951,79 @@ button:active, .btn:active {
     line-height: 1.4;
 }
 
+/* Auth buttons in main menu */
+.auth-buttons-menu {
+    margin-top: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.user-info-menu {
+    color: #ffffff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-buttons-menu .google-btn {
+    width: 100%;
+    justify-content: center;
+    background: #fff;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.auth-buttons-menu .btn-secondary {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.auth-buttons-menu .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.auth-buttons-menu #signin-help-menu {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 5px;
+}
+
+/* Mobile optimizations for auth menu */
+@media (max-width: 768px) {
+    .auth-buttons-menu {
+        margin-top: 15px;
+        padding: 12px;
+    }
+    
+    .auth-buttons-menu .google-btn,
+    .auth-buttons-menu .btn-secondary {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .user-info-menu {
+        font-size: 0.85rem;
+        padding: 10px;
+    }
+}
+
 /* Achievement Modal */
 .achievement-modal .modal-content {
     background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);

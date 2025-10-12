@@ -457,10 +457,12 @@ class FirebaseManager {
         const signInBtn = document.getElementById('googleSignIn');
         const signOutBtn = document.getElementById('signOut');
         const userInfo = document.getElementById('userInfo');
+        const userInfoMenu = document.getElementById('userInfoMenu');
 
         if (signInBtn) signInBtn.style.display = isSignedIn ? 'none' : 'block';
         if (signOutBtn) signOutBtn.style.display = isSignedIn ? 'block' : 'none';
         
+        // Update profile page userInfo (if it exists)
         if (userInfo && currentUser) {
             userInfo.innerHTML = `
                 <div class="user-profile">
@@ -470,6 +472,13 @@ class FirebaseManager {
             `;
         } else if (userInfo) {
             userInfo.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
+        }
+        
+        // Update main menu userInfoMenu
+        if (userInfoMenu && currentUser) {
+            userInfoMenu.innerHTML = `Inloggad som ${currentUser.displayName}`;
+        } else if (userInfoMenu) {
+            userInfoMenu.innerHTML = 'Inte inloggad - data sparas lokalt';
         }
     }
 
@@ -753,6 +762,8 @@ class FirebaseManager {
         
         // Lägg till rollbadge i användarinfo
         const userInfo = document.getElementById('userInfo');
+        const userInfoMenu = document.getElementById('userInfoMenu');
+        
         if (userInfo && currentUser) {
             const roleEmoji = this.isAdmin ? '👑' : this.isModerator ? '🛡️' : '👤';
             const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'Användare';
@@ -764,6 +775,12 @@ class FirebaseManager {
                     <span class="role-badge ${this.userRole}">${roleEmoji} ${roleText}</span>
                 </div>
             `;
+        }
+        
+        if (userInfoMenu && currentUser) {
+            const roleEmoji = this.isAdmin ? '👑' : this.isModerator ? '🛡️' : '👤';
+            const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'Användare';
+            userInfoMenu.innerHTML = `${roleEmoji} Inloggad som ${currentUser.displayName} (${roleText})`;
         }
     }
     

@@ -129,6 +129,12 @@ class FirebaseManager {
 
             this.isInitialized = true;
             console.log('🎉 Firebase fullständigt initialiserat!');
+            console.log('✅ Final status check:', {
+                isInitialized: this.isInitialized,
+                auth: !!auth,
+                db: !!db,
+                firebase: !!firebase
+            });
             return true;
             
         } catch (error) {
@@ -192,13 +198,22 @@ class FirebaseManager {
 
     async signInWithGoogle() {
         console.log('🔐 Startar Google Sign-In process...');
+        console.log('🔍 Kontrollerar Firebase status:', {
+            isInitialized: this.isInitialized,
+            auth: !!auth,
+            firebase: !!firebase
+        });
         
         if (!this.isInitialized) {
             console.error('❌ Firebase inte initialiserat');
-            if (window.showToast) {
-                window.showToast('Firebase inte initialiserat. Försök igen senare.', 'error');
+            console.log('🔄 Försöker initiera Firebase nu...');
+            const success = await this.initialize();
+            if (!success) {
+                if (window.showToast) {
+                    window.showToast('Firebase kunde inte initialiseras. Försök igen senare.', 'error');
+                }
+                return false;
             }
-            return false;
         }
         
         if (!auth) {

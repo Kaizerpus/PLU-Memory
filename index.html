@@ -621,7 +621,7 @@
     </script>
     
     <!-- Firebase Configuration -->
-    <script src="firebase-config.js?v=20251012-38"></script>
+    <script src="firebase-config.js?v=20251012-39"></script>
     
     <!-- Firebase Initialization -->
     <script>
@@ -640,6 +640,11 @@
                 if (success) {
                     console.log('✅ Firebase framgångsrikt initialiserat');
                     console.log('🎯 window.firebaseManager is now available:', !!window.firebaseManager);
+                    console.log('🔍 Firebase Manager state after init:', {
+                        isInitialized: window.firebaseManager.isInitialized,
+                        hasAuth: !!window.auth,
+                        hasDb: !!window.db
+                    });
                 } else {
                     console.log('⚠️ Firebase initialisering misslyckades - fortsätter i offline-läge');
                 }

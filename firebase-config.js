@@ -766,6 +766,19 @@ class FirebaseManager {
             `;
         }
     }
+    
+    // Getter methods for user information
+    get currentUser() {
+        return currentUser;
+    }
+    
+    get currentUserName() {
+        return currentUser?.displayName || 'Anonym';
+    }
+    
+    get currentUserEmail() {
+        return currentUser?.email || '';
+    }
 }
 
 // Initiera Firebase Manager globalt

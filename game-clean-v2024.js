@@ -1188,7 +1188,7 @@ class DataManager {
         const data = {
             version: this.dataVersion,
             timestamp: new Date().toISOString(),
-            playerName: document.getElementById('playerName')?.value || 'Anonym',
+            playerName: window.firebaseManager?.currentUserName || 'Anonym',
             gameData: {
                 totalGamesPlayed: parseInt(localStorage.getItem('totalGamesPlayed') || '0'),
                 totalCorrectAnswers: parseInt(localStorage.getItem('totalCorrectAnswers') || '0'),
@@ -3099,9 +3099,8 @@ function endGame() {
     const gameDiv = document.getElementById('game');
     const percentage = Math.round((score / totalQuestions) * 100);
     
-    // Hämta spelarnamn
-    const playerNameInput = document.getElementById('playerName');
-    const playerName = playerNameInput ? playerNameInput.value.trim() || 'Anonym' : 'Anonym';
+    // Hämta spelarnamn från Firebase-användare
+    const playerName = window.firebaseManager?.currentUserName || 'Anonym';
     
     // Hämta filter-information för highscore
     const categoryFilter = document.getElementById('categoryFilter');
@@ -3455,22 +3454,20 @@ function setupAdvancedAnalytics() {
 function showMenu() {
     console.log('Visar huvudmeny');
     hideAllSections();
-    showSection('nameSection');
     showSection('menuButtons');
     hideSection('gameModeSection');
     hideSection('filterSection');
+    
+    // Visa gamemode direkt om användaren är inloggad
+    if (window.firebaseManager?.currentUser) {
+        // Inloggad användare - visa gamemode-valet direkt
+        showSection('gameModeSection');
+        hideSection('menuButtons');
+    }
 }
 
 function showGameModeSelection() {
     console.log('Visar spellägesval');
-    
-    // Validate player name first
-    const playerNameInput = document.getElementById('playerName');
-    if (playerNameInput && !playerNameInput.value.trim()) {
-        alert('Ange ditt namn först!');
-        playerNameInput.focus();
-        return;
-    }
     
     hideSection('menuButtons');
     showSection('gameModeSection');
@@ -3537,7 +3534,6 @@ function hideSection(sectionId) {
 function showLeaderboard() {
     console.log('Visar topplista');
     hideAllSections();
-    hideSection('nameSection');
     hideSection('filterSection');
     hideSection('menuButtons');
     showSection('leaderboard');
@@ -3606,7 +3602,6 @@ function showLeaderboard() {
 function showAchievements() {
     console.log('Visar achievements');
     hideAllSections();
-    hideSection('nameSection');
     hideSection('filterSection');
     hideSection('menuButtons');
     showSection('achievements');
@@ -3668,7 +3663,6 @@ function showAchievements() {
 function showProfile() {
     console.log('Visar profil');
     hideAllSections();
-    hideSection('nameSection');
     hideSection('filterSection');
     hideSection('menuButtons');
     showSection('profile');
@@ -3678,9 +3672,8 @@ function showProfile() {
     const playerStats = document.getElementById('playerStats');
     
     if (profileContent && window.achievementsManager && window.highscoreManager) {
-        // Hämta spelarnamn
-        const playerNameInput = document.getElementById('playerName');
-        const playerName = playerNameInput ? playerNameInput.value.trim() || 'Anonym' : 'Anonym';
+        // Hämta spelarnamn från Firebase-användare
+        const playerName = window.firebaseManager?.currentUserName || 'Anonym';
         
         // Hämta achievements statistik
         const achievementsStats = window.achievementsManager.stats;
@@ -3870,7 +3863,6 @@ function resetAllStats() {
 function showAccessibility() {
     console.log('Visar tillgänglighet');
     hideAllSections();
-    hideSection('nameSection');
     hideSection('filterSection');
     hideSection('menuButtons');
     showSection('accessibility');
@@ -3988,14 +3980,6 @@ function loadAccessibilityPreferences() {
 function startGame() {
     console.log('Startar spel från meny');
     
-    // Validate player name
-    const playerNameInput = document.getElementById('playerName');
-    if (playerNameInput && !playerNameInput.value.trim()) {
-        alert('Ange ditt namn först!');
-        playerNameInput.focus();
-        return;
-    }
-    
     // Reset feedback manager for new game
     if (window.feedbackManager) {
         window.feedbackManager.reset();
@@ -4027,7 +4011,6 @@ function startGame() {
     console.log('Antal frågor för detta spel:', totalQuestions);
     
     // Hide menu sections and show game
-    hideSection('nameSection');
     hideSection('filterSection');
     hideSection('menuButtons');
     hideAllSections();

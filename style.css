@@ -893,48 +893,6 @@ button:disabled {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Namn-sektion */
-#nameSection {
-    text-align: center;
-    margin-bottom: 25px;
-    background: linear-gradient(135deg, #f8f9fa, #ffffff);
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-#nameSection label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: #dc3545;
-    font-size: 16px;
-}
-
-#playerName {
-    padding: 12px 16px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    font-size: 16px;
-    width: 250px;
-    max-width: 90%;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-#playerName:focus {
-    outline: none;
-    border-color: #dc3545;
-    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
-    transform: scale(1.02);
-}
-
-#playerName::placeholder {
-    color: #6c757d;
-    font-style: italic;
-}
-
 /* Gamemode-sektion */
 #gameModeSection {
     text-align: center;
@@ -2717,7 +2675,6 @@ input:focus, select:focus {
         min-height: 150px;
     }
     
-    #nameSection,
     #filterSection,
     #gameModeSection {
         margin: 15px 0;
@@ -2746,11 +2703,6 @@ input:focus, select:focus {
     
     .gamemode-description {
         font-size: 13px;
-    }
-    
-    #playerName {
-        width: 100%;
-        max-width: 280px;
     }
 }
 
@@ -3385,7 +3337,6 @@ body.offline .game-container {
     border-color: #404040 !important;
 }
 
-[data-theme="dark"] #nameSection,
 [data-theme="dark"] #filterSection,
 [data-theme="dark"] #gameModeSection,
 [data-theme="dark"] #game-area,
@@ -3393,7 +3344,6 @@ body.offline .game-container {
 [data-theme="dark"] #achievements,
 [data-theme="dark"] #profile,
 [data-theme="dark"] #accessibility,
-.dark-theme #nameSection,
 .dark-theme #filterSection,
 .dark-theme #gameModeSection,
 .dark-theme #game-area,

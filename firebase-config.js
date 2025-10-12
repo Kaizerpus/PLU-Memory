@@ -216,7 +216,24 @@ class FirebaseManager {
             provider.addScope('email');
             
             console.log('🪟 Öppnar Google Sign-In popup...');
-            const result = await auth.signInWithPopup(provider);
+            let result;
+            
+            try {
+                // Försök med popup först
+                result = await auth.signInWithPopup(provider);
+            } catch (popupError) {
+                console.log('⚠️ Popup misslyckades, försöker redirect...', popupError.code);
+                
+                if (popupError.code === 'auth/popup-blocked' || 
+                    popupError.code === 'auth/popup-closed-by-user') {
+                    // Fallback till redirect om popup blockeras
+                    console.log('🔄 Använder redirect istället för popup...');
+                    await auth.signInWithRedirect(provider);
+                    return true; // Redirect hanteras av Firebase
+                } else {
+                    throw popupError; // Kasta vidare andra fel
+                }
+            }
             
             console.log('✅ Google Sign-In framgångsrik:', {
                 user: result.user.displayName,
@@ -1138,22 +1155,26 @@ function closeRegisterModal() {
 
 // Register functions called from register modal
 async function registerWithGoogle() {
+    console.log('🔗 registerWithGoogle funktionen kallad');
     closeRegisterModal();
     if (!window.firebaseManager) {
         console.error('❌ Firebase Manager inte tillgängligt');
         if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
         return;
     }
+    console.log('🔥 Anropar firebaseManager.signInWithGoogle...');
     await window.firebaseManager.signInWithGoogle();
 }
 
 async function registerWithApple() {
+    console.log('🔗 registerWithApple funktionen kallad');
     closeRegisterModal();
     if (!window.firebaseManager) {
         console.error('❌ Firebase Manager inte tillgängligt');
         if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
         return;
     }
+    console.log('🔥 Anropar firebaseManager.signInWithApple...');
     await window.firebaseManager.signInWithApple();
 }
 
@@ -1189,22 +1210,26 @@ function closeAuthModal() {
 
 // Provider functions called from modal
 async function signInWithGoogle() {
+    console.log('🔗 signInWithGoogle funktionen kallad');
     closeAuthModal();
     if (!window.firebaseManager) {
         console.error('❌ Firebase Manager inte tillgängligt');
         if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
         return;
     }
+    console.log('🔥 Anropar firebaseManager.signInWithGoogle...');
     await window.firebaseManager.signInWithGoogle();
 }
 
 async function signInWithApple() {
+    console.log('🔗 signInWithApple funktionen kallad');
     closeAuthModal();
     if (!window.firebaseManager) {
         console.error('❌ Firebase Manager inte tillgängligt');
         if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
         return;
     }
+    console.log('🔥 Anropar firebaseManager.signInWithApple...');
     await window.firebaseManager.signInWithApple();
 }
 
@@ -1422,15 +1447,32 @@ document.addEventListener('click', (event) => {
 
 // Modal button event listeners - setup after DOM loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🔗 Setting up modal event listeners...');
+    
     // Google sign-in buttons  
     const googleSignInBtn = document.getElementById('googleSignInBtn');
     const googleRegisterBtn = document.getElementById('googleRegisterBtn');
     
     if (googleSignInBtn) {
-        googleSignInBtn.addEventListener('click', signInWithGoogle);
+        console.log('✅ Google Sign-In button found, adding event listener');
+        googleSignInBtn.addEventListener('click', (e) => {
+            console.log('👆 Google Sign-In button clicked');
+            e.preventDefault();
+            signInWithGoogle();
+        });
+    } else {
+        console.log('❌ Google Sign-In button not found');
     }
+    
     if (googleRegisterBtn) {
-        googleRegisterBtn.addEventListener('click', registerWithGoogle);
+        console.log('✅ Google Register button found, adding event listener');
+        googleRegisterBtn.addEventListener('click', (e) => {
+            console.log('👆 Google Register button clicked');
+            e.preventDefault();
+            registerWithGoogle();
+        });
+    } else {
+        console.log('❌ Google Register button not found');
     }
     
     // Apple sign-in buttons
@@ -1438,10 +1480,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const appleRegisterBtn = document.getElementById('appleRegisterBtn');
     
     if (appleSignInBtn) {
-        appleSignInBtn.addEventListener('click', signInWithApple);
+        console.log('✅ Apple Sign-In button found, adding event listener');
+        appleSignInBtn.addEventListener('click', (e) => {
+            console.log('👆 Apple Sign-In button clicked');
+            e.preventDefault();
+            signInWithApple();
+        });
+    } else {
+        console.log('❌ Apple Sign-In button not found');
     }
+    
     if (appleRegisterBtn) {
-        appleRegisterBtn.addEventListener('click', registerWithApple);
+        console.log('✅ Apple Register button found, adding event listener');
+        appleRegisterBtn.addEventListener('click', (e) => {
+            console.log('👆 Apple Register button clicked');
+            e.preventDefault();
+            registerWithApple();
+        });
+    } else {
+        console.log('❌ Apple Register button not found');
     }
     
     console.log('🔗 Modal event listeners setup complete');

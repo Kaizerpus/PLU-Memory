@@ -2,12 +2,12 @@
 // Du behöver ersätta värdena nedan med dina egna från Firebase Console
 
 const firebaseConfig = {
-  apiKey: "DIN_API_KEY_HÄR",
-  authDomain: "ditt-projekt.firebaseapp.com",
-  projectId: "ditt-projekt-id",
-  storageBucket: "ditt-projekt.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+ apiKey: "AIzaSyD-your-actual-key-here",
+  authDomain: "plu-memory-game.firebaseapp.com",
+  projectId: "plu-memory-game",
+  storageBucket: "plu-memory-game.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdef123456789"
 };
 
 // Firebase-moduler som laddas från CDN
@@ -406,5 +406,6 @@ window.firebaseManager = new FirebaseManager();
 document.addEventListener('DOMContentLoaded', async () => {
     await window.firebaseManager.initialize();
 });
+
 
 export default window.firebaseManager;

@@ -964,14 +964,15 @@ button:disabled {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 25px 20px;
+    justify-content: center;
+    padding: 30px 20px;
     background: linear-gradient(135deg, #ffffff, #f8f9ff);
     border: 2px solid #e6e8ff;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
-    min-height: 160px;
+    min-height: 180px;
     position: relative;
     overflow: hidden;
 }
@@ -1004,8 +1005,10 @@ button:disabled {
 .gamemode-description {
     font-size: 14px;
     color: #666;
-    line-height: 1.4;
+    line-height: 1.5;
     display: block;
+    margin-top: 8px;
+    max-width: 260px;
 }
 
 .gamemode-controls {
@@ -2727,8 +2730,8 @@ input:focus, select:focus {
     }
     
     .gamemode-btn {
-        min-height: 140px;
-        padding: 20px 15px;
+        min-height: 160px;
+        padding: 25px 15px;
     }
     
     .gamemode-icon {
@@ -3585,7 +3588,7 @@ body.offline .game-container {
 
 [data-theme="dark"] .gamemode-description,
 .dark-theme .gamemode-description {
-    color: #cccccc !important;
+    color: #bbb !important;
 }
 
 [data-theme="dark"] .primary-btn,

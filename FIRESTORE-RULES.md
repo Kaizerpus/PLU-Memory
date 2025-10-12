@@ -50,19 +50,20 @@ service cloud.firestore {
 
 ## Firestore Index som behövs:
 
-Du behöver skapa ett **composite index** i Firebase Console för den nya leaderboard-queryn:
+Du behöver bara ett **enkelt index** i Firebase Console för den nya leaderboard-queryn:
 
 1. **Gå till Firebase Console**: https://console.firebase.google.com/
-2. **Firestore Database** → **Indexes** → **Composite indexes**
-3. **Add index** med följande inställningar:
+2. **Firestore Database** → **Indexes** → **Single field indexes**
+3. **Kontrollera att det finns ett index för**:
    - **Collection ID**: `users`
-   - **Fields to index**:
-     - `gameData.totalGamesPlayed` - **Ascending**
-     - `gameData.bestScore` - **Descending**
+   - **Field path**: `gameData.bestScore`
    - **Query scope**: Collection
-4. **Create index**
+   - **Array config**: --
+   - **Order**: Descending
 
-Alternativt kommer Firebase automatiskt föreslå detta index första gången queryn körs.
+Detta index skapas oftast automatiskt första gången queryn körs.
+
+**OBS:** Vi behöver INTE längre det composite index eftersom vi flyttade filtreringen till JavaScript-koden för att undvika Firestore-begränsningar.
 
 ## Hur du uppdaterar reglerna:
 

@@ -558,10 +558,11 @@ class FirebaseManager {
         try {
             console.log('🔍 Hämtar leaderboard från Firebase...');
             
+            // Vi kan inte kombinera where + orderBy på olika fält i Firestore
+            // Så vi hämtar alla användare och filtrerar i JavaScript istället
             const snapshot = await db.collection('users')
-                .where('gameData.totalGamesPlayed', '>', 0) // Endast användare som spelat minst 1 spel
                 .orderBy('gameData.bestScore', 'desc')
-                .limit(limit)
+                .limit(50) // Hämta fler för att kompensera för filtrering
                 .get();
 
             console.log('📊 Firebase query result:', {
@@ -586,12 +587,13 @@ class FirebaseManager {
                     bestScoreDetails: data.gameData?.bestScoreDetails || null
                 };
             }).filter(user => {
-                const isValid = user.bestScore > 0;
+                // Filtrera i JavaScript istället för Firestore query
+                const isValid = user.bestScore > 0 && user.totalGamesPlayed > 0;
                 if (!isValid) {
-                    console.log('🚫 Filtrerar bort användare med 0 poäng:', user);
+                    console.log('🚫 Filtrerar bort användare:', user);
                 }
                 return isValid;
-            });
+            }).slice(0, limit); // Ta bara de första X efter filtrering
 
             console.log('✅ Slutgiltiga leaderboard resultat:', results);
             return results;

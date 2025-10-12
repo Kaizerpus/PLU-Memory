@@ -627,7 +627,7 @@
     </script>
     
     <!-- Firebase Configuration -->
-    <script src="firebase-config.js?v=20251012-35"></script>
+    <script src="firebase-config.js?v=20251012-36"></script>
     
     <!-- Firebase Initialization -->
     <script>
@@ -641,6 +641,13 @@
                     console.log('✅ Firebase framgångsrikt initialiserat');
                 } else {
                     console.log('⚠️ Firebase initialisering misslyckades - fortsätter i offline-läge');
+                }
+                
+                // Setup auth buttons efter Firebase är initialiserat
+                if (window.setupAuthButtons) {
+                    window.setupAuthButtons();
+                } else {
+                    console.log('⚠️ setupAuthButtons function not found');
                 }
             }
         });

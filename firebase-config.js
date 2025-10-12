@@ -1104,14 +1104,6 @@ class FirebaseManager {
 // Initiera Firebase Manager globalt
 window.firebaseManager = new FirebaseManager();
 
-// Auto-initiera när sidan laddas
-document.addEventListener('DOMContentLoaded', async () => {
-    await window.firebaseManager.initialize();
-    
-    // Lägg till event listeners för autentiseringsknapparna
-    setupAuthButtons();
-});
-
 // Setup authentication button event listeners
 function setupAuthButtons() {
     console.log('🔗 Setting up main auth buttons...');
@@ -1138,6 +1130,9 @@ function setupAuthButtons() {
     } else {
         console.log('❌ Register button not found');
     }
+
+// Make setupAuthButtons globally available
+window.setupAuthButtons = setupAuthButtons;
     
     // Sign Out
     const signOutBtn = document.getElementById('signOut');
@@ -1150,9 +1145,13 @@ function setupAuthButtons() {
 
 // Register modal functions
 function openRegisterModal() {
+    console.log('🚪 Opening register modal...');
     const modal = document.getElementById('registerModal');
     if (modal) {
+        console.log('✅ Register modal found, showing...');
         modal.classList.remove('hidden');
+    } else {
+        console.log('❌ Register modal not found!');
     }
 }
 
@@ -1205,9 +1204,13 @@ function switchToLogin() {
 
 // Provider selection modal functions
 function openAuthProviderModal() {
+    console.log('🚪 Opening auth provider modal...');
     const modal = document.getElementById('authProviderModal');
     if (modal) {
+        console.log('✅ Auth modal found, showing...');
         modal.classList.remove('hidden');
+    } else {
+        console.log('❌ Auth modal not found!');
     }
 }
 

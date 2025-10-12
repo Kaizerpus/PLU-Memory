@@ -3728,6 +3728,7 @@ function showProfile() {
     // Display real profile and statistics
     const profileContent = document.getElementById('profileContent');
     const playerStats = document.getElementById('playerStats');
+    const profileStats = document.getElementById('profileStats');
     
     if (profileContent && window.achievementsManager && window.highscoreManager) {
         // Hämta spelarnamn från Firebase-användare
@@ -3748,7 +3749,8 @@ function showProfile() {
         const avgResponseTime = achievementsStats.responseTimes.length > 0 ?
             Math.round(achievementsStats.responseTimes.reduce((a, b) => a + b, 0) / achievementsStats.responseTimes.length / 1000 * 10) / 10 : 0;
         
-        let html = `
+        // User info HTML (goes to playerStats)
+        let userInfoHtml = `
             <div class="profile-header">
                 <div class="player-avatar">👤</div>
                 <div class="player-info">
@@ -3806,7 +3808,10 @@ function showProfile() {
                     </div>
                 </div>
             </div>
-            
+        `;
+        
+        // Stats sections HTML (goes to profileStats)  
+        let statsHtml = `
             <div class="profile-sections">
                 <div class="recent-scores">
                     <h4>🏅 Dina bästa resultat</h4>
@@ -3840,17 +3845,22 @@ function showProfile() {
             </div>
         `;
         
-        profileContent.innerHTML = html;
+        // Set content for both sections
+        playerStats.innerHTML = userInfoHtml;
+        if (profileStats) profileStats.innerHTML = statsHtml;
         
     } else {
         // Fallback om managers inte finns
-        if (profileContent) {
-            profileContent.innerHTML = `
+        if (playerStats) {
+            playerStats.innerHTML = `
                 <div class="profile-placeholder">
                     <p>📊 Spelarstatistik kommer att visas här efter att du spelat några spel.</p>
                     <p>💡 Starta ditt första spel för att börja samla statistik!</p>
                 </div>
             `;
+        }
+        if (profileStats) {
+            profileStats.innerHTML = '';
         }
     }
 }

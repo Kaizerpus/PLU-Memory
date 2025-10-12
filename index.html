@@ -7,7 +7,7 @@
     <meta name="keywords" content="PLU, produktkoder, ICA, träning, spel, lärande">
     <meta name="author" content="ICA Training App">
     <title>PLU Memory - Träna dina produktkoder</title>
-    <link rel="stylesheet" href="style.css?v=20251012-25">
+    <link rel="stylesheet" href="style.css?v=20251012-26">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
     <meta name="theme-color" content="#dc3545">
     
@@ -280,28 +280,31 @@
                  aria-describedby="profile-description">
                 <div id="playerStats" role="region" aria-labelledby="player-stats-heading"></div>
                 <h4 id="player-stats-heading" class="sr-only" aria-level="4">Spelarstatistik</h4>
-            </div>
-            
-            <!-- Auth buttons section - placed after existing playerStats -->
-            <div id="authButtonsSection" class="auth-buttons-section">
-                <!-- Login/Register buttons (shown when not logged in) -->
-                <div id="authButtons" class="auth-buttons-container">
-                    <button id="loginButton" type="button" class="btn btn-primary auth-btn-profile">
-                        🔐 Logga in
+                
+                <!-- Auth buttons section - placed after user info but before stats sections -->
+                <div id="authButtonsSection" class="auth-buttons-section">
+                    <!-- Login/Register buttons (shown when not logged in) -->
+                    <div id="authButtons" class="auth-buttons-container">
+                        <button id="loginButton" type="button" class="btn btn-primary auth-btn-profile">
+                            🔐 Logga in
+                        </button>
+                        <button id="registerButton" type="button" class="btn btn-success auth-btn-profile">
+                            ➕ Skapa konto
+                        </button>
+                    </div>
+                    
+                    <!-- Logout button (shown when logged in) -->
+                    <button id="signOut" type="button" class="btn btn-secondary logout-btn" style="display: none;">
+                        🚪 Logga ut
                     </button>
-                    <button id="registerButton" type="button" class="btn btn-success auth-btn-profile">
-                        ➕ Skapa konto
-                    </button>
+                    
+                    <div id="signin-help-profile" class="help-text">
+                        Logga in för att synka dina resultat mellan enheter och se leaderboard
+                    </div>
                 </div>
                 
-                <!-- Logout button (shown when logged in) -->
-                <button id="signOut" type="button" class="btn btn-secondary logout-btn" style="display: none;">
-                    🚪 Logga ut
-                </button>
-                
-                <div id="signin-help-profile" class="help-text">
-                    Logga in för att synka dina resultat mellan enheter och se leaderboard
-                </div>
+                <div id="profileStats" role="region" aria-labelledby="profile-stats-heading"></div>
+                <h4 id="profile-stats-heading" class="sr-only" aria-level="4">Spelstatistik och achievements</h4>
             </div>
             
             <!-- Profile Controls -->
@@ -599,7 +602,7 @@
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toastContainer"></div>
     
-    <script src="game-clean-v2024.js?v=20251012-11"></script>
+    <script src="game-clean-v2024.js?v=20251012-26"></script>
     <script>
         // Register Service Worker for offline support
         if ('serviceWorker' in navigator) {
@@ -639,6 +642,6 @@
     </script>
     
     <!-- Firebase Configuration -->
-    <script src="firebase-config.js?v=20251012-25"></script>
+    <script src="firebase-config.js?v=20251012-26"></script>
 </body>
 </html>

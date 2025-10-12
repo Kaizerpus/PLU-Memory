@@ -3838,40 +3838,8 @@ function showProfile() {
             </div>
         `;
         
-        // Stats sections HTML (goes to profileStats) - Two columns side by side
-        let statsHtml = `
-            <div class="profile-sections-row">
-                <div class="recent-scores">
-                    <h4>🏅 Dina bästa resultat</h4>
-                    ${playerScores.length > 0 ? `
-                        <div class="scores-list">
-                            ${playerScores.slice(0, 3).map((score, index) => `
-                                <div class="score-item">
-                                    <div class="score-rank">#${topScores.findIndex(s => s === score) + 1}</div>
-                                    <div class="score-details">
-                                        <div class="score-percentage">${score.percentage}%</div>
-                                        <div class="score-info">${score.score}/${score.totalQuestions} - ${score.date}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<p>Inga resultat än. Spela ditt första spel!</p>'}
-                </div>
-                
-                <div class="achievements-summary">
-                    <h4>🏆 Achievements översikt</h4>
-                    <div class="achievements-progress-bar">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${achievementsProgress.percentage}%"></div>
-                        </div>
-                        <span>${achievementsProgress.unlocked}/${achievementsProgress.total} (${achievementsProgress.percentage}%)</span>
-                    </div>
-                    <div class="recent-achievements">
-                        ${getRecentAchievements()}
-                    </div>
-                </div>
-            </div>
-        `;
+        // No additional stats sections - keeping only the 6 stat cards
+        let statsHtml = '';
         
         // Set content for both sections
         playerStats.innerHTML = userInfoHtml;

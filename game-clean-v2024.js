@@ -4567,21 +4567,15 @@ class TouchEnhancer {
             const absX = Math.abs(deltaX);
             const absY = Math.abs(deltaY);
 
+            // Only handle horizontal swipes (left/right)
             if (absX >= this.minSwipeDistance && absX > absY) {
-                // Horizontal swipe
                 if (deltaX > 0) {
                     this.handleSwipeRight();
                 } else {
                     this.handleSwipeLeft();
                 }
-            } else if (absY >= this.minSwipeDistance && absY > absX) {
-                // Vertical swipe
-                if (deltaY > 0) {
-                    this.handleSwipeDown();
-                } else {
-                    this.handleSwipeUp();
-                }
             }
+            // Vertical swipes are now disabled for better mobile experience
         }
 
         this.startX = null;
@@ -4609,18 +4603,6 @@ class TouchEnhancer {
             console.log('➡️ Swipe right: Tillbaka till meny');
             if (window.showMenu) window.showMenu();
         }
-    }
-
-    handleSwipeUp() {
-        // Swipe up - show profile/stats
-        console.log('⬆️ Swipe up: Profil');
-        if (window.showProfile) window.showProfile();
-    }
-
-    handleSwipeDown() {
-        // Swipe down - show achievements
-        console.log('⬇️ Swipe down: Prestationer');
-        if (window.showAchievements) window.showAchievements();
     }
 
     enhanceButtonTouchFeedback() {

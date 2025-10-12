@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PLU Memory - Träna dina PLU-koder för ICA. Interaktivt spel för att lära sig produktkoder.">
+    <meta name="keywords" content="PLU, produktkoder, ICA, träning, spel, lärande">
+    <meta name="author" content="ICA Training App">
+    <title>PLU Memory - Träna dina produktkoder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+    <meta name="theme-color" content="#dc3545">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PLU Memory">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23dc3545' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white'>🛒</text></svg>">
+</head>
+<body>
+    <div class="skip-links">
+        <a href="#main-content" class="skip-link">Hoppa till huvudinnehåll</a>
+        <a href="#navigation" class="skip-link">Hoppa till navigation</a>
+        <a href="#accessibility-settings" class="skip-link">Hoppa till tillgänglighetsinställningar</a>
+    </div>
+    
+    <!-- Accessibility Settings (initially hidden) -->
+    <div id="accessibility-settings" class="sr-only-focusable" tabindex="-1">
+        <h2>Tillgänglighetsinställningar</h2>
+        <div class="accessibility-controls">
+            <button type="button" id="toggleHighContrast" aria-pressed="false">
+                Växla högkontrast (Alt+M)
+            </button>
+            <button type="button" id="cycleTextSize">
+                Ändra textstorlek (Alt+T)
+            </button>
+            <button type="button" id="showKeyboardHelp">
+                Visa hjälp och kortkommandon (Alt+H)
+            </button>
+        </div>
+    </div>
+    
+    <main id="main-content" class="game-container" role="main" aria-label="PLU Memory Spel"
+          aria-describedby="game-description">
+        <header role="banner">
+            <h1 id="game-title" aria-level="1">🛒 PLU Memory</h1>
+            <p class="game-description" id="game-description">Träna dina PLU-koder och bli en produktexpert! Använd Tab för att navigera eller Alt+H för hjälp.</p>
+        </header>
+        
+        <section id="nameSection" aria-labelledby="player-info-heading" role="form">
+            <h2 id="player-info-heading" class="sr-only" aria-level="2">Spelarinformation</h2>
+            <label for="playerName">👤 Ditt namn:</label>
+            <input 
+                type="text" 
+                id="playerName" 
+                placeholder="Skriv ditt namn här" 
+                maxlength="20"
+                aria-describedby="name-help"
+                aria-required="true"
+                aria-invalid="false"
+                autocomplete="username"
+                role="textbox">
+            <div id="name-help" class="help-text" role="note">Ange ditt namn för att spara dina resultat</div>
+            <div id="name-error" class="error-message" role="alert" aria-live="polite" style="display: none;"></div>
+        </section>
+        
+        <section id="filterSection" aria-labelledby="game-settings-heading" role="region">
+            <h2 id="game-settings-heading" aria-level="2">🎯 Välj vad du vill träna på:</h2>
+            
+            <fieldset class="filter-group" aria-labelledby="category-label">
+                <legend id="category-label">📦 Kategori:</legend>
+                <select id="categoryFilter" 
+                        aria-describedby="category-help" 
+                        aria-required="false"
+                        aria-expanded="false"
+                        role="combobox">
+                    <option value="alla">🌟 Alla kategorier</option>
+                    <option value="grönsaker">🥕 Grönsaker</option>
+                    <option value="bröd">🍞 Fikabröd</option>
+                    <option value="snacks">🍿 Snacks</option>
+                    <option value="bakverk">🧁 Bakverk</option>
+                    <option value="söndagsbröd">🥖 Söndagsbröd</option>
+                </select>
+                <div id="category-help" class="help-text" role="note">Välj vilken produktkategori du vill träna på</div>
+            </fieldset>
+            
+            <fieldset class="filter-group" aria-labelledby="difficulty-label">
+                <legend id="difficulty-label">⚡ Svårighet:</legend>
+                <select id="difficultyFilter" 
+                        aria-describedby="difficulty-help"
+                        aria-required="false"
+                        aria-expanded="false"
+                        role="combobox">
+                    <option value="alla">Alla svårigheter</option>
+                    <option value="vanlig">Vanlig</option>
+                    <option value="medel">Medel</option>
+                    <option value="ovanlig">Ovanlig</option>
+                </select>
+                <div id="difficulty-help" class="help-text" role="note">Välj svårighetsgrad för produkterna</div>
+            </fieldset>
+            
+            <fieldset class="filter-group" aria-labelledby="count-label">
+                <legend id="count-label">🔢 Antal produkter:</legend>
+                <select id="countFilter" 
+                        aria-describedby="count-help"
+                        aria-required="false"
+                        aria-expanded="false"
+                        role="combobox">
+                    <!-- Alternativen fylls av JavaScript baserat på filter -->
+                </select>
+                <div id="count-help" class="help-text" role="note">Välj hur många produkter du vill träna på</div>
+            </fieldset>
+        </section>
+        
+        <nav id="navigation" role="navigation" aria-label="Huvudmeny">
+            <div id="menuButtons" class="button-group" role="group" aria-labelledby="menu-buttons-heading">
+                <h3 id="menu-buttons-heading" class="sr-only" aria-level="3">Spelkontroller</h3>
+                
+                <button id="startBtn" 
+                        class="primary-btn" 
+                        aria-describedby="start-help"
+                        type="button"
+                        role="button">🚀 Starta spelet</button>
+                <div id="start-help" class="help-text" role="note">Börja träna med valda inställningar</div>
+                
+                <button id="leaderboardBtn" 
+                        class="secondary-btn" 
+                        aria-describedby="leaderboard-help"
+                        type="button"
+                        aria-haspopup="dialog"
+                        role="button">🏆 Visa topplista</button>
+                <div id="leaderboard-help" class="help-text" role="note">Se de bästa resultaten</div>
+                
+                <button id="achievementsBtn" 
+                        class="achievements-btn" 
+                        aria-describedby="achievements-help"
+                        type="button"
+                        aria-haspopup="dialog"
+                        role="button">🏅 Achievements</button>
+                <div id="achievements-help" class="help-text" role="note">Visa upplåsta prestationer</div>
+                
+                <button id="profileBtn" 
+                        class="profile-btn" 
+                        aria-describedby="profile-help"
+                        type="button"
+                        aria-haspopup="dialog"
+                        role="button">📊 Profil</button>
+                <div id="profile-help" class="help-text" role="note">Se din detaljerade statistik</div>
+                
+                <button id="darkModeToggle" 
+                        class="theme-btn" 
+                        aria-pressed="false" 
+                        aria-describedby="theme-help"
+                        type="button"
+                        role="switch">🌙 Mörkt tema</button>
+                <div id="theme-help" class="help-text" role="note">Växla mellan ljust och mörkt tema</div>
+                
+                <button id="soundToggleBtn" 
+                        class="sound-btn" 
+                        aria-pressed="true" 
+                        aria-describedby="sound-help"
+                        type="button"
+                        role="switch">🔊 Ljud: På</button>
+                <div id="sound-help" class="help-text" role="note">Slå på/av ljudeffekter</div>
+                
+                <button id="accessibilityBtn" 
+                        class="accessibility-btn" 
+                        aria-describedby="accessibility-help"
+                        type="button"
+                        aria-haspopup="dialog"
+                        role="button">⚙️ Tillgänglighet</button>
+                <div id="accessibility-help" class="help-text" role="note">Öppna tillgänglighetsinställningar</div>
+            </div>
+        </nav>
+        
+        <section id="game-area" aria-labelledby="game-status-heading" role="main">
+            <h3 id="game-status-heading" class="sr-only" aria-level="3">Spelområde</h3>
+            <div id="game" role="region" aria-live="polite" aria-atomic="true"></div>
+            <div class="score" id="score" role="status" aria-live="polite" aria-label="Aktuell poäng"></div>
+        </section>
+        
+        <div id="gameButtons" class="hidden" role="group" aria-labelledby="game-controls-heading">
+            <h3 id="game-controls-heading" class="sr-only" aria-level="3">Spelkontroller efter spel</h3>
+            <button id="restartBtn" type="button" role="button" aria-describedby="restart-help">Spela igen</button>
+            <div id="restart-help" class="help-text sr-only">Starta ett nytt spel med samma inställningar</div>
+            <button id="backToMenuBtn" type="button" role="button" aria-describedby="back-menu-help">Tillbaka till meny</button>
+            <div id="back-menu-help" class="help-text sr-only">Gå tillbaka till huvudmenyn</div>
+        </div>
+        
+        <section id="leaderboard" class="hidden" role="dialog" aria-labelledby="leaderboard-title" aria-modal="false">
+            <h2 id="leaderboard-title" aria-level="2">🏆 Topplista</h2>
+            <div id="leaderboardButtons" role="group" aria-labelledby="leaderboard-controls-heading">
+                <h3 id="leaderboard-controls-heading" class="sr-only" aria-level="3">Topplista kontroller</h3>
+                <button id="backToMenuFromLeaderboard" type="button" role="button">Tillbaka till meny</button>
+                <button id="clearScoresBtn" 
+                        class="warning-btn" 
+                        type="button" 
+                        role="button"
+                        aria-describedby="clear-warning">Rensa topplista</button>
+                <div id="clear-warning" class="help-text sr-only">VARNING: Detta raderar alla sparade resultat permanent</div>
+            </div>
+            <div id="leaderboardList" 
+                 role="table" 
+                 aria-labelledby="leaderboard-title"
+                 aria-describedby="leaderboard-description"></div>
+            <div id="leaderboard-description" class="sr-only">Tabell med de bästa spelresultaten, sorterad efter procentandel rätta svar</div>
+        </section>
+        
+        <section id="achievements" class="hidden" role="dialog" aria-labelledby="achievements-title" aria-modal="false">
+            <h2 id="achievements-title" aria-level="2">🏅 Achievements</h2>
+            <div id="achievementsButtons" role="group" aria-labelledby="achievements-controls-heading">
+                <h3 id="achievements-controls-heading" class="sr-only" aria-level="3">Achievement kontroller</h3>
+                <button id="backToMenuFromAchievements" type="button" role="button">Tillbaka till meny</button>
+            </div>
+            <div id="achievementsSummary" 
+                 role="status" 
+                 aria-labelledby="achievements-summary-heading"
+                 aria-live="polite"></div>
+            <h3 id="achievements-summary-heading" class="sr-only" aria-level="3">Achievement sammanfattning</h3>
+            <div id="achievementsList" 
+                 role="list" 
+                 aria-labelledby="achievements-list-heading"></div>
+            <h3 id="achievements-list-heading" class="sr-only" aria-level="3">Lista över achievements</h3>
+        </section>
+        
+        <section id="profile" class="hidden" role="dialog" aria-labelledby="profile-title" aria-modal="false">
+            <h2 id="profile-title" aria-level="2">📊 Profil & Statistik</h2>
+            
+            <!-- Firebase Authentication Section -->
+            <div id="firebaseAuth" class="auth-section" role="region" aria-labelledby="auth-heading">
+                <h3 id="auth-heading" aria-level="3">🔐 Kontoprofil</h3>
+                <div id="userInfo" class="user-info">
+                    <span>Inte inloggad - data sparas lokalt</span>
+                </div>
+                <div class="auth-buttons">
+                    <button id="googleSignIn" type="button" class="btn btn-primary google-btn" aria-describedby="signin-help">
+                        <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Logga in med Google
+                    </button>
+                    <button id="signOut" type="button" class="btn btn-secondary" style="display: none;">
+                        Logga ut
+                    </button>
+                </div>
+                <div id="signin-help" class="help-text">
+                    Logga in för att synka dina resultat mellan enheter och se leaderboard
+                </div>
+            </div>
+            
+            <div id="profileButtons" role="group" aria-labelledby="profile-controls-heading">
+                <h3 id="profile-controls-heading" class="sr-only" aria-level="3">Profil kontroller</h3>
+                <button id="backToMenuFromProfile" type="button" role="button">Tillbaka till meny</button>
+                <button id="resetStatsBtn" 
+                        class="warning-btn" 
+                        type="button" 
+                        role="button"
+                        aria-describedby="reset-warning">Nollställ statistik</button>
+                <div id="reset-warning" class="help-text sr-only">VARNING: Detta raderar all spelstatistik permanent</div>
+            </div>
+            <div id="profileContent" 
+                 role="tabpanel" 
+                 aria-labelledby="profile-title"
+                 aria-describedby="profile-description">
+                <div id="playerStats" role="region" aria-labelledby="player-stats-heading"></div>
+                <h4 id="player-stats-heading" class="sr-only" aria-level="4">Spelarstatistik</h4>
+            </div>
+            <div id="profile-description" class="sr-only">Detaljerad statistik över dina spelresultat och prestationer</div>
+        </section>
+        
+        <section id="accessibility" class="hidden" role="dialog" aria-labelledby="accessibility-title" aria-modal="false">
+            <h2 id="accessibility-title" aria-level="2">⚙️ Tillgänglighetsinställningar</h2>
+            <div id="accessibilityButtons" role="group" aria-labelledby="accessibility-controls-heading">
+                <h3 id="accessibility-controls-heading" class="sr-only" aria-level="3">Tillgänglighet kontroller</h3>
+                <button id="backToMenuFromAccessibility" type="button" role="button">Tillbaka till meny</button>
+            </div>
+            
+            <div id="accessibilityContent" role="tabpanel" aria-labelledby="accessibility-title">
+                
+                <fieldset class="accessibility-group" aria-labelledby="visual-preferences-heading">
+                    <legend id="visual-preferences-heading">👁️ Visuella inställningar</legend>
+                    
+                    <div class="preference-item" role="group" aria-labelledby="high-contrast-label">
+                        <input type="checkbox" 
+                               id="highContrastToggle" 
+                               aria-describedby="high-contrast-help"
+                               role="switch"
+                               aria-checked="false">
+                        <label id="high-contrast-label" for="highContrastToggle">Högkontrast-läge</label>
+                        <div id="high-contrast-help" class="help-text">Aktivera högkontrast för bättre synlighet</div>
+                    </div>
+                    
+                    <div class="preference-item" role="group" aria-labelledby="large-buttons-label">
+                        <input type="checkbox" 
+                               id="largeButtonsToggle" 
+                               aria-describedby="large-buttons-help"
+                               role="switch"
+                               aria-checked="false">
+                        <label id="large-buttons-label" for="largeButtonsToggle">Större knappar</label>
+                        <div id="large-buttons-help" class="help-text">Gör knappar större för enklare klickning</div>
+                    </div>
+                    
+                    <div class="preference-item" role="group" aria-labelledby="reduced-motion-label">
+                        <input type="checkbox" 
+                               id="reducedMotionToggle" 
+                               aria-describedby="reduced-motion-help"
+                               role="switch"
+                               aria-checked="false">
+                        <label id="reduced-motion-label" for="reducedMotionToggle">Reducera rörelser</label>
+                        <div id="reduced-motion-help" class="help-text">Minska animationer och övergångar</div>
+                    </div>
+                </fieldset>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Accessibility: Live regions för screen readers -->
+    <div aria-live="polite" aria-atomic="true" class="sr-only" id="gameStatus"></div>
+    <div aria-live="assertive" aria-atomic="true" class="sr-only" id="gameAlerts"></div>
+    <div aria-live="polite" aria-atomic="false" class="sr-only" id="scoreUpdates"></div>
+    
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script src="game-clean-v2024.js"></script>
+    <script>
+        // Register Service Worker for offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered:', registration);
+                        
+                        // Show offline status
+                        updateOfflineStatus();
+                        
+                        // Listen for online/offline events
+                        window.addEventListener('online', updateOfflineStatus);
+                        window.addEventListener('offline', updateOfflineStatus);
+                    })
+                    .catch(error => {
+                        console.warn('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        function updateOfflineStatus() {
+            const isOnline = navigator.onLine;
+            console.log('📶 Connection status:', isOnline ? 'Online' : 'Offline');
+            
+            // Add visual indicator for offline mode
+            document.body.classList.toggle('offline', !isOnline);
+            
+            // Show notification for offline/online status
+            if (window.showToast) {
+                const message = isOnline ? 
+                    '🌐 Du är online igen!' : 
+                    '📱 Offline-läge aktiverat - spelet fungerar fortfarande!';
+                window.showToast(message, isOnline ? 'success' : 'info');
+            }
+        }
+    </script>
+    
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+</body>
+</html>

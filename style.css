@@ -995,11 +995,80 @@ button:disabled {
 #menuButtons {
     text-align: center;
     margin-top: 30px;
+    max-width: 100%;
 }
 
 #menuButtons button {
-    margin: 0 10px;
+    margin: 8px 10px;
     display: inline-block;
+}
+
+/* Mobiloptimering för huvudmeny */
+@media (max-width: 767px) {
+    #menuButtons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+        padding: 0 15px;
+    }
+    
+    /* Gruppera knappar för bättre organisation */
+    .primary-buttons,
+    .secondary-buttons,
+    .settings-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .primary-buttons {
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .secondary-buttons {
+        border-left: 4px solid #6c757d;
+    }
+    
+    .settings-buttons {
+        border-left: 4px solid #17a2b8;
+    }
+    
+    /* Större, mer touchvänliga knappar på mobil */
+    #menuButtons button {
+        min-height: 54px;
+        font-size: 16px;
+        padding: 14px 20px;
+        margin: 0;
+        border-radius: 8px;
+        touch-action: manipulation;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Förhindra zoom och oavsiktlig selection */
+    #menuButtons button {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Hjälptext under knappar på mobil */
+    #menuButtons .help-text {
+        font-size: 12px;
+        margin-top: 4px;
+        color: var(--text-secondary);
+        text-align: center;
+    }
 }
 
 #startBtn {
@@ -5534,4 +5603,112 @@ button:not(.special-button)::after {
 
 .admin-only {
     border-left: 4px solid #ffd700;
+}
+
+/* 📱 MOBILOPTIMERING - Förbättrad scrollning och touch */
+@media (max-width: 767px) {
+    /* Förbättra scrollbeteende */
+    html {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    body {
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Förhindra horisontell scrollning */
+    .game-container {
+        max-width: 100vw;
+        overflow-x: hidden;
+        padding: 10px;
+    }
+    
+    /* Touch-optimerade knappar */
+    button {
+        min-height: 44px; /* Apple rekommendation för touch targets */
+        min-width: 44px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    /* Touch-feedback */
+    button:active {
+        transform: scale(0.95);
+        background-color: var(--primary-color-dark);
+    }
+    
+    /* Förbättra formulärelement på mobil */
+    input, select, textarea {
+        min-height: 44px;
+        font-size: 16px; /* Förhindrar zoom på iOS */
+        border-radius: 8px;
+        padding: 12px;
+    }
+    
+    /* Inställningspaneler mer kompakta på mobil */
+    .accessibility-group {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    .preference-item {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .preference-item:last-child {
+        border-bottom: none;
+    }
+    
+    .preference-item label {
+        flex: 1;
+        margin-right: 15px;
+        font-size: 16px;
+    }
+    
+    .preference-item input[type="checkbox"] {
+        width: 44px;
+        height: 24px;
+        appearance: none;
+        background: #ccc;
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .preference-item input[type="checkbox"]:checked {
+        background: var(--primary-color);
+    }
+    
+    .preference-item input[type="checkbox"]:after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: white;
+        top: 2px;
+        left: 2px;
+        transition: left 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .preference-item input[type="checkbox"]:checked:after {
+        left: 22px;
+    }
+    
+    /* Förbättra hjälptext läsbarhet */
+    .help-text {
+        font-size: 14px;
+        line-height: 1.4;
+        margin-top: 8px;
+        color: var(--text-secondary);
+    }
 }

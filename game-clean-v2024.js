@@ -5154,4 +5154,98 @@ class AdminPanel {
 window.adminPanel = new AdminPanel();
 
 console.log('👑 Admin Panel initierat - rollsystem aktivt');
+
+// 📱 MOBILOPTIMERING - Hantera nya inställningsstrukturen
+document.addEventListener('DOMContentLoaded', () => {
+    // Synka tema-inställningar mellan huvudknapp och inställningspanel
+    const darkModeMain = document.getElementById('darkModeToggle');
+    const darkModeAccessibility = document.getElementById('darkModeToggleAccessibility');
+    
+    // Synka ljud-inställningar
+    const soundMain = document.getElementById('soundToggleBtn');
+    const soundAccessibility = document.getElementById('soundToggleAccessibility');
+    
+    // Tema-synkronisering
+    if (darkModeMain && darkModeAccessibility) {
+        // Synka tillstånd från huvudknapp till inställningar
+        const syncThemeToAccessibility = () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            darkModeAccessibility.checked = isDark;
+        };
+        
+        // Synka från inställningar till huvudknapp
+        darkModeAccessibility.addEventListener('change', () => {
+            if (darkModeMain.onclick) {
+                darkModeMain.onclick();
+            }
+            // Uppdatera state efter kort fördröjning
+            setTimeout(syncThemeToAccessibility, 100);
+        });
+        
+        // Initial synk
+        syncThemeToAccessibility();
+        
+        // Synka när tema ändras via huvudknapp
+        const originalThemeClick = darkModeMain.onclick;
+        darkModeMain.onclick = () => {
+            if (originalThemeClick) originalThemeClick();
+            setTimeout(syncThemeToAccessibility, 100);
+        };
+    }
+    
+    // Ljud-synkronisering
+    if (soundMain && soundAccessibility) {
+        const syncSoundToAccessibility = () => {
+            const isSoundOn = soundMain.textContent.includes('På');
+            soundAccessibility.checked = isSoundOn;
+        };
+        
+        soundAccessibility.addEventListener('change', () => {
+            if (soundMain.onclick) {
+                soundMain.onclick();
+            }
+            setTimeout(syncSoundToAccessibility, 100);
+        });
+        
+        // Initial synk
+        syncSoundToAccessibility();
+        
+        // Synka när ljud ändras via huvudknapp
+        const originalSoundClick = soundMain.onclick;
+        soundMain.onclick = () => {
+            if (originalSoundClick) originalSoundClick();
+            setTimeout(syncSoundToAccessibility, 100);
+        };
+    }
+    
+    // Förbättra touch-hantering på mobil
+    if ('ontouchstart' in window) {
+        // Lägg till touch-optimering för alla knappar
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            }, { passive: true });
+            
+            button.addEventListener('touchend', function() {
+                this.style.transform = '';
+            }, { passive: true });
+            
+            button.addEventListener('touchcancel', function() {
+                this.style.transform = '';
+            }, { passive: true });
+        });
+        
+        // Förhindra dubbeltryck-zoom på viktiga element
+        const preventZoom = (e) => {
+            if (e.touches && e.touches.length > 1) {
+                e.preventDefault();
+            }
+        };
+        
+        document.addEventListener('touchstart', preventZoom, { passive: false });
+    }
+});
+
+console.log('📱 Mobiloptimering aktiverad - förbättrad touch-upplevelse');
 console.log('🔥 Firebase achievements och leaderboard aktiverat');

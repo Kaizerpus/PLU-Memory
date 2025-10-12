@@ -117,69 +117,62 @@
             <div id="menuButtons" class="button-group" role="group" aria-labelledby="menu-buttons-heading">
                 <h3 id="menu-buttons-heading" class="sr-only" aria-level="3">Spelkontroller</h3>
                 
-                <button id="startBtn" 
-                        class="primary-btn" 
-                        aria-describedby="start-help"
-                        type="button"
-                        role="button">🚀 Starta spelet</button>
-                <div id="start-help" class="help-text" role="note">Börja träna med valda inställningar</div>
+                <!-- Huvudknappar -->
+                <div class="primary-buttons">
+                    <button id="startBtn" 
+                            class="primary-btn" 
+                            aria-describedby="start-help"
+                            type="button"
+                            role="button">🚀 Starta spelet</button>
+                    <div id="start-help" class="help-text" role="note">Börja träna med valda inställningar</div>
+                    
+                    <button id="leaderboardBtn" 
+                            class="secondary-btn" 
+                            aria-describedby="leaderboard-help"
+                            type="button"
+                            aria-haspopup="dialog"
+                            role="button">🏆 Visa topplista</button>
+                    <div id="leaderboard-help" class="help-text" role="note">Se de bästa resultaten</div>
+                </div>
                 
-                <button id="leaderboardBtn" 
-                        class="secondary-btn" 
-                        aria-describedby="leaderboard-help"
-                        type="button"
-                        aria-haspopup="dialog"
-                        role="button">🏆 Visa topplista</button>
-                <div id="leaderboard-help" class="help-text" role="note">Se de bästa resultaten</div>
+                <!-- Profil och achievements -->
+                <div class="secondary-buttons">
+                    <button id="achievementsBtn" 
+                            class="achievements-btn" 
+                            aria-describedby="achievements-help"
+                            type="button"
+                            aria-haspopup="dialog"
+                            role="button">🏅 Achievements</button>
+                    <div id="achievements-help" class="help-text" role="note">Visa upplåsta prestationer</div>
+                    
+                    <button id="profileBtn" 
+                            class="profile-btn" 
+                            aria-describedby="profile-help"
+                            type="button"
+                            aria-haspopup="dialog"
+                            role="button">📊 Profil</button>
+                    <div id="profile-help" class="help-text" role="note">Se din detaljerade statistik</div>
+                </div>
                 
-                <button id="achievementsBtn" 
-                        class="achievements-btn" 
-                        aria-describedby="achievements-help"
-                        type="button"
-                        aria-haspopup="dialog"
-                        role="button">🏅 Achievements</button>
-                <div id="achievements-help" class="help-text" role="note">Visa upplåsta prestationer</div>
-                
-                <button id="profileBtn" 
-                        class="profile-btn" 
-                        aria-describedby="profile-help"
-                        type="button"
-                        aria-haspopup="dialog"
-                        role="button">📊 Profil</button>
-                <div id="profile-help" class="help-text" role="note">Se din detaljerade statistik</div>
-                
-                <button id="darkModeToggle" 
-                        class="theme-btn" 
-                        aria-pressed="false" 
-                        aria-describedby="theme-help"
-                        type="button"
-                        role="switch">🌙 Mörkt tema</button>
-                <div id="theme-help" class="help-text" role="note">Växla mellan ljust och mörkt tema</div>
-                
-                <button id="soundToggleBtn" 
-                        class="sound-btn" 
-                        aria-pressed="true" 
-                        aria-describedby="sound-help"
-                        type="button"
-                        role="switch">🔊 Ljud: På</button>
-                <div id="sound-help" class="help-text" role="note">Slå på/av ljudeffekter</div>
-                
-                <button id="accessibilityBtn" 
-                        class="accessibility-btn" 
-                        aria-describedby="accessibility-help"
-                        type="button"
-                        aria-haspopup="dialog"
-                        role="button">⚙️ Tillgänglighet</button>
-                <div id="accessibility-help" class="help-text" role="note">Öppna tillgänglighetsinställningar</div>
-                
-                <button id="adminBtn" 
-                        class="admin-btn admin-only" 
-                        aria-describedby="admin-help"
-                        type="button"
-                        aria-haspopup="dialog"
-                        role="button"
-                        style="display: none;">👑 Admin Panel</button>
-                <div id="admin-help" class="help-text" role="note">Hantera användare och roller (endast admin)</div>
+                <!-- Inställningar -->
+                <div class="settings-buttons">
+                    <button id="accessibilityBtn" 
+                            class="accessibility-btn" 
+                            aria-describedby="accessibility-help"
+                            type="button"
+                            aria-haspopup="dialog"
+                            role="button">⚙️ Inställningar</button>
+                    <div id="accessibility-help" class="help-text" role="note">Ändra tema, ljud och tillgänglighetsinställningar</div>
+                    
+                    <button id="adminBtn" 
+                            class="admin-btn admin-only" 
+                            aria-describedby="admin-help"
+                            type="button"
+                            aria-haspopup="dialog"
+                            role="button"
+                            style="display: none;">👑 Admin Panel</button>
+                    <div id="admin-help" class="help-text" role="note">Hantera användare och roller (endast admin)</div>
+                </div>
             </div>
         </nav>
         
@@ -282,14 +275,40 @@
         </section>
         
         <section id="accessibility" class="hidden" role="dialog" aria-labelledby="accessibility-title" aria-modal="false">
-            <h2 id="accessibility-title" aria-level="2">⚙️ Tillgänglighetsinställningar</h2>
+            <h2 id="accessibility-title" aria-level="2">⚙️ Inställningar</h2>
             <div id="accessibilityButtons" role="group" aria-labelledby="accessibility-controls-heading">
-                <h3 id="accessibility-controls-heading" class="sr-only" aria-level="3">Tillgänglighet kontroller</h3>
+                <h3 id="accessibility-controls-heading" class="sr-only" aria-level="3">Inställningar kontroller</h3>
                 <button id="backToMenuFromAccessibility" type="button" role="button">Tillbaka till meny</button>
             </div>
             
             <div id="accessibilityContent" role="tabpanel" aria-labelledby="accessibility-title">
                 
+                <!-- Grundinställningar -->
+                <fieldset class="accessibility-group" aria-labelledby="basic-settings-heading">
+                    <legend id="basic-settings-heading">🎮 Grundinställningar</legend>
+                    
+                    <div class="preference-item" role="group" aria-labelledby="theme-toggle-label">
+                        <input type="checkbox" 
+                               id="darkModeToggleAccessibility" 
+                               aria-describedby="theme-toggle-help"
+                               role="switch"
+                               aria-checked="false">
+                        <label id="theme-toggle-label" for="darkModeToggleAccessibility">🌙 Mörkt tema</label>
+                        <div id="theme-toggle-help" class="help-text">Växla mellan ljust och mörkt tema</div>
+                    </div>
+                    
+                    <div class="preference-item" role="group" aria-labelledby="sound-toggle-label">
+                        <input type="checkbox" 
+                               id="soundToggleAccessibility" 
+                               aria-describedby="sound-toggle-help"
+                               role="switch"
+                               aria-checked="true">
+                        <label id="sound-toggle-label" for="soundToggleAccessibility">🔊 Ljudeffekter</label>
+                        <div id="sound-toggle-help" class="help-text">Slå på/av ljudeffekter</div>
+                    </div>
+                </fieldset>
+                
+                <!-- Visuella inställningar -->
                 <fieldset class="accessibility-group" aria-labelledby="visual-preferences-heading">
                     <legend id="visual-preferences-heading">👁️ Visuella inställningar</legend>
                     

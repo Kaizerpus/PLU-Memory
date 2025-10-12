@@ -278,6 +278,13 @@
                  role="tabpanel" 
                  aria-labelledby="profile-title"
                  aria-describedby="profile-description">
+                
+                <!-- Auth Buttons (visible when not logged in) -->
+                <div id="authButtons" class="auth-buttons">
+                    <button id="loginButton" class="auth-btn primary">📋 Logga in</button>
+                    <button id="registerButton" class="auth-btn success">📝 Skapa konto</button>
+                </div>
+                
                 <div id="playerStats" role="region" aria-labelledby="player-stats-heading"></div>
                 <h4 id="player-stats-heading" class="sr-only" aria-level="4">Spelarstatistik</h4>
                 
@@ -620,7 +627,7 @@
     </script>
     
     <!-- Firebase Configuration -->
-    <script src="firebase-config.js?v=20251012-34"></script>
+    <script src="firebase-config.js?v=20251012-35"></script>
     
     <!-- Firebase Initialization -->
     <script>

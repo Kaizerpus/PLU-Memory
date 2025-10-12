@@ -1114,19 +1114,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Setup authentication button event listeners
 function setupAuthButtons() {
+    console.log('🔗 Setting up main auth buttons...');
+    
     // Main auth buttons
     const loginBtn = document.getElementById('loginButton');
     if (loginBtn) {
+        console.log('✅ Login button found, adding event listener');
         loginBtn.addEventListener('click', () => {
+            console.log('👆 Login button clicked');
             openAuthProviderModal();
         });
+    } else {
+        console.log('❌ Login button not found');
     }
     
     const registerBtn = document.getElementById('registerButton');
     if (registerBtn) {
+        console.log('✅ Register button found, adding event listener');
         registerBtn.addEventListener('click', () => {
+            console.log('👆 Register button clicked');
             openRegisterModal();
         });
+    } else {
+        console.log('❌ Register button not found');
     }
     
     // Sign Out

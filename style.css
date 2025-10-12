@@ -5043,24 +5043,30 @@ button:active, .btn:active {
 .user-info-profile {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-    margin-bottom: 15px;
-    padding: 12px;
+    margin-bottom: 0;
+    padding: 20px;
     background: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    border-radius: 15px 15px 0 0;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: none;
     color: #ffffff;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
 }
 
 .auth-buttons-profile {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 0;
     padding: 20px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
+    border-radius: 0 0 15px 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
 }
 
 .auth-main-buttons {
@@ -5832,9 +5838,16 @@ button:active, .btn:active {
 }
 
 .auth-section-profile .help-text {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.85rem;
-    margin-top: 10px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    margin-top: 0;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0 0 15px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: none;
+    text-align: center;
+    font-style: italic;
 }
 
 /* Leaderboard header styling */

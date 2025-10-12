@@ -5158,6 +5158,8 @@ button:active, .btn:active {
     min-height: 100px;
     white-space: nowrap;
     overflow: visible;
+    flex: 1;
+    margin: 10px 0;
 }
 
 .provider-btn:hover {
@@ -5186,10 +5188,17 @@ button:active, .btn:active {
     width: 60vw;
     min-height: 70vh;
     max-height: 90vh;
+    display: flex;
+    flex-direction: column;
 }
 
 #authProviderModal .modal-body {
     padding: 50px 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 25px;
 }
 
 #authProviderModal .modal-header {
@@ -5208,6 +5217,8 @@ button:active, .btn:active {
     min-width: 600px;
     min-height: 80vh;
     max-height: 95vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .register-intro {
@@ -5579,6 +5590,8 @@ button:active, .btn:active {
     overflow-y: auto;
     color: white;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
 }
 
 .email-modal .modal-header {
@@ -5619,12 +5632,24 @@ button:active, .btn:active {
 
 .email-modal .modal-body {
     padding: 35px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .email-auth-tabs {
     display: flex;
     gap: 15px;
     margin-bottom: 30px;
+    justify-content: center;
+}
+
+/* Ensure all modal bodies use available space properly */
+.modal-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
 }
 
@@ -5656,10 +5681,14 @@ button:active, .btn:active {
     display: none;
     max-width: 500px;
     margin: 0 auto;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-evenly;
+    min-height: 400px;
 }
 
 .email-form.active {
-    display: block;
+    display: flex;
 }
 
 .email-form .form-group {

@@ -1771,7 +1771,7 @@ class BackupManager {
     init() {
         this.setupAutoBackup();
         this.cleanOldBackups();
-        this.checkForDataRecovery();
+        // this.checkForDataRecovery(); // Inaktiverad - för irriterande popup
         console.log('🔄 BackupManager initialiserad');
     }
 

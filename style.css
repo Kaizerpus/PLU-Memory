@@ -5024,50 +5024,169 @@ button:active, .btn:active {
     }
 }
 
-/* Auth section in profile page */
-.auth-section-profile {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* Profile Navigation */
+.profile-navigation {
+    margin-bottom: 30px;
+}
+
+.back-btn {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 25px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.auth-section-profile h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #ffffff;
-    font-size: 1.1rem;
-}
-
-.user-info-profile {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 0;
+    gap: 8px;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+/* User Info Section */
+.user-info-section {
+    margin-bottom: 25px;
+}
+
+.user-info-display {
     padding: 20px;
     background: rgba(255, 255, 255, 0.15);
-    border-radius: 15px 15px 0 0;
+    border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: none;
     color: #ffffff;
     text-align: center;
     font-size: 16px;
     font-weight: 500;
 }
 
-.auth-buttons-profile {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 0;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 0 0 15px 15px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-top: none;
+/* Auth Buttons Section */
+.auth-buttons-section {
+    margin-bottom: 30px;
 }
+
+.auth-buttons-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.auth-btn-profile {
+    flex: 1;
+    min-width: 140px;
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.auth-btn-profile.btn-primary {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.auth-btn-profile.btn-primary:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.auth-btn-profile.btn-success {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+}
+
+.auth-btn-profile.btn-success:hover {
+    background: linear-gradient(135deg, #1976D2, #1565C0);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #d32f2f, #c62828);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+.auth-buttons-section .help-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    text-align: center;
+    margin-top: 15px;
+    font-style: italic;
+}
+
+/* Profile Controls */
+.profile-controls {
+    margin-bottom: 30px;
+}
+
+/* Mobile responsiveness for new profile structure */
+@media (max-width: 768px) {
+    .back-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    .user-info-display {
+        padding: 15px;
+        font-size: 14px;
+    }
+    
+    .auth-buttons-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .auth-btn-profile {
+        min-width: unset;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    .logout-btn {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    .auth-buttons-section .help-text {
+        font-size: 12px;
+    }
+}
+
+/* Old auth styles removed - replaced with new profile structure */
 
 .auth-main-buttons {
     display: flex;

@@ -5156,6 +5156,8 @@ button:active, .btn:active {
     box-sizing: border-box;
     text-align: left;
     min-height: 70px;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .provider-btn:hover {
@@ -5174,6 +5176,20 @@ button:active, .btn:active {
 .provider-btn span {
     font-weight: 700;
     font-size: 18px;
+    flex: 1;
+}
+
+/* Ensure modal content is wide enough for text */
+#authProviderModal .modal-content {
+    max-width: 500px !important;
+}
+
+#authProviderModal .modal-body {
+    padding: 30px;
+}
+
+#authProviderModal .modal-header h3 {
+    font-size: 1.7rem;
 }
 
 /* Register Modal Styles */
@@ -5272,6 +5288,51 @@ button:active, .btn:active {
     .register-option .provider-btn svg {
         width: 24px;
         height: 24px;
+    }
+    
+    /* Auth provider modal mobile */
+    #authProviderModal .modal-content {
+        max-width: 95% !important;
+        margin: 20px auto;
+    }
+    
+    .provider-btn {
+        padding: 18px 20px;
+        min-height: 65px;
+        font-size: 16px;
+    }
+    
+    .provider-btn span {
+        font-size: 16px;
+        white-space: normal;
+        line-height: 1.3;
+    }
+    
+    .provider-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    #authProviderModal .modal-header h3 {
+        font-size: 1.4rem;
+    }
+}
+
+/* Additional responsive breakpoint for very small screens */
+@media (max-width: 480px) {
+    .email-modal .modal-content {
+        max-width: 98% !important;
+        margin: 10px auto;
+    }
+    
+    .provider-btn {
+        padding: 15px 18px;
+        font-size: 15px;
+        min-height: 60px;
+    }
+    
+    .provider-btn span {
+        font-size: 15px;
     }
 }
 
@@ -5426,7 +5487,7 @@ button:active, .btn:active {
     border-radius: 20px;
     padding: 0;
     width: 90%;
-    max-width: 450px;
+    max-width: 550px;
     max-height: 90vh;
     overflow-y: auto;
     color: white;

@@ -1590,6 +1590,22 @@ class DataManager {
         window.location.reload(); // Enkel lösning för att uppdatera allt
     }
 
+    // Restore data från Firebase (för kompatibilitet)
+    async restoreFromData(data) {
+        console.log('🔄 Återställer data från Firebase...');
+        try {
+            if (data && this.validateDataStructure(data)) {
+                await this.mergeData(data);
+                this.refreshUI();
+                console.log('✅ Data återställd från Firebase');
+            } else {
+                console.log('⚠️ Ogiltig datastruktur från Firebase');
+            }
+        } catch (error) {
+            console.error('❌ Fel vid återställning från Firebase:', error);
+        }
+    }
+
     setupExportButtons() {
         // Lägg till export-knappar till profil-sektionen
         const profileSection = document.getElementById('profile');

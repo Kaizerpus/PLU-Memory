@@ -754,6 +754,14 @@ class FirebaseManager {
         } else if (userInfoMenu) {
             userInfoMenu.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
         }
+        
+        // Trigger profile regeneration after auth state change
+        if (window.showProfile && typeof window.showProfile === 'function') {
+            console.log('🔄 Uppdaterar profil efter auth state change');
+            setTimeout(() => {
+                window.showProfile();
+            }, 500);
+        }
     }
 
     // Achievements system

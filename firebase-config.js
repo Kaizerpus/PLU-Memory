@@ -26,6 +26,8 @@ class FirebaseManager {
         this.pendingWrites = [];
         this.retryCount = 0;
         this.maxRetries = 3;
+        this.persistenceEnabled = false;
+        this.authListenerSet = false;
         
         // Lyssna på nätverksstatus
         window.addEventListener('online', () => {
@@ -40,39 +42,94 @@ class FirebaseManager {
 
     async initialize() {
         try {
+            // Kontrollera om redan initialiserat
+            if (this.isInitialized) {
+                console.log('🔄 Firebase redan initialiserat');
+                return true;
+            }
+            
+            console.log('🔥 Startar Firebase-initialisering...');
+            
             // Kontrollera om Firebase config är konfigurerad
             if (firebaseConfig.apiKey === "DIN_API_KEY_HÄR") {
                 console.log('⚠️ Firebase inte konfigurerad - använder offline-läge');
                 return false;
             }
 
-            // Ladda Firebase från CDN
-            await this.loadFirebaseScripts();
-            
-            // Initiera Firebase
-            firebase = window.firebase;
-            firebase.initializeApp(firebaseConfig);
-            
-            // Sätt upp Firestore och Auth
-            db = firebase.firestore();
-            auth = firebase.auth();
-            
-            // Aktivera offline-stöd
-            db.enablePersistence({ synchronizeTabs: true })
-                .catch(err => console.log('Offline persistence redan aktiverat'));
-            
-            // Lyssna på autentiseringsförändringar
-            auth.onAuthStateChanged(user => {
-                currentUser = user;
-                this.handleAuthStateChange(user);
+            console.log('📋 Firebase config verkar konfigurerad:', {
+                projectId: firebaseConfig.projectId,
+                authDomain: firebaseConfig.authDomain
             });
 
+            // Kontrollera om Firebase redan är laddat
+            if (!window.firebase) {
+                console.log('📦 Laddar Firebase scripts från CDN...');
+                await this.loadFirebaseScripts();
+                console.log('✅ Firebase scripts laddade');
+            } else {
+                console.log('♻️ Firebase scripts redan laddade');
+            }
+            
+            // Initiera Firebase (bara om inte redan gjort)
+            firebase = window.firebase;
+            if (!firebase) {
+                throw new Error('Firebase kunde inte laddas från CDN');
+            }
+            
+            // Kontrollera om Firebase app redan är initialiserad
+            if (firebase.apps.length === 0) {
+                console.log('🚀 Initialiserar Firebase med config...');
+                firebase.initializeApp(firebaseConfig);
+                console.log('✅ Firebase app initialiserad');
+            } else {
+                console.log('♻️ Firebase app redan initialiserad');
+            }
+            
+            // Sätt upp Firestore och Auth
+            console.log('🗃️ Sätter upp Firestore...');
+            db = firebase.firestore();
+            console.log('✅ Firestore konfigurerad');
+            
+            console.log('🔐 Sätter upp Authentication...');
+            auth = firebase.auth();
+            console.log('✅ Auth konfigurerad');
+            
+            // Aktivera offline-stöd (bara en gång)
+            if (!this.persistenceEnabled) {
+                console.log('💾 Aktiverar offline persistence...');
+                db.enablePersistence({ synchronizeTabs: true })
+                    .then(() => {
+                        console.log('✅ Offline persistence aktiverat');
+                        this.persistenceEnabled = true;
+                    })
+                    .catch(err => {
+                        console.log('⚠️ Offline persistence kunde inte aktiveras:', err.message);
+                        // Detta är OK, fortsätt ändå
+                    });
+            }
+            
+            // Lyssna på autentiseringsförändringar (bara en gång)
+            if (!this.authListenerSet) {
+                console.log('👂 Sätter upp auth state listener...');
+                auth.onAuthStateChanged(user => {
+                    currentUser = user;
+                    console.log('👤 Auth state ändrad:', user ? `Inloggad som ${user.displayName}` : 'Ej inloggad');
+                    this.handleAuthStateChange(user);
+                });
+                this.authListenerSet = true;
+            }
+
             this.isInitialized = true;
-            console.log('🔥 Firebase initialiserat');
+            console.log('🎉 Firebase fullständigt initialiserat!');
             return true;
             
         } catch (error) {
             console.error('❌ Firebase init misslyckades:', error);
+            console.error('📍 Fel detaljer:', {
+                message: error.message,
+                code: error.code,
+                stack: error.stack
+            });
             return false;
         }
     }
@@ -85,14 +142,32 @@ class FirebaseManager {
         ];
 
         for (const src of scripts) {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
+            console.log(`📥 Laddar: ${src}`);
+            try {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = () => {
+                        console.log(`✅ Laddad: ${src}`);
+                        resolve();
+                    };
+                    script.onerror = (error) => {
+                        console.error(`❌ Kunde inte ladda: ${src}`, error);
+                        reject(new Error(`Failed to load script: ${src}`));
+                    };
+                    document.head.appendChild(script);
+                });
+            } catch (error) {
+                console.error(`💥 Script-laddning misslyckades för ${src}:`, error);
+                throw error;
+            }
         }
+        
+        console.log('🔍 Kontrollerar att Firebase är tillgängligt...');
+        if (typeof window.firebase === 'undefined') {
+            throw new Error('Firebase inte tillgängligt efter script-laddning');
+        }
+        console.log('✅ Firebase globalt objekt bekräftat');
     }
 
     handleAuthStateChange(user) {
@@ -107,20 +182,83 @@ class FirebaseManager {
     }
 
     async signInWithGoogle() {
-        if (!this.isInitialized) return false;
+        console.log('🔐 Startar Google Sign-In process...');
+        
+        if (!this.isInitialized) {
+            console.error('❌ Firebase inte initialiserat');
+            if (window.showToast) {
+                window.showToast('Firebase inte initialiserat. Försök igen senare.', 'error');
+            }
+            return false;
+        }
+        
+        if (!auth) {
+            console.error('❌ Firebase Auth inte tillgängligt');
+            if (window.showToast) {
+                window.showToast('Authentication inte tillgängligt.', 'error');
+            }
+            return false;
+        }
         
         try {
+            console.log('🏗️ Skapar Google Auth Provider...');
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope('profile');
             provider.addScope('email');
             
+            console.log('🪟 Öppnar Google Sign-In popup...');
             const result = await auth.signInWithPopup(provider);
-            window.showToast(`Välkommen ${result.user.displayName}! 👋`, 'success');
+            
+            console.log('✅ Google Sign-In framgångsrik:', {
+                user: result.user.displayName,
+                email: result.user.email,
+                uid: result.user.uid
+            });
+            
+            if (window.showToast) {
+                window.showToast(`Välkommen ${result.user.displayName}! 👋`, 'success');
+            }
+            
+            // Triggera en synkronisering av användardata
+            setTimeout(() => {
+                this.syncUserData();
+            }, 1000);
+            
             return true;
             
         } catch (error) {
-            console.error('❌ Inloggning misslyckades:', error);
-            window.showToast('Inloggning misslyckades. Försök igen.', 'error');
+            console.error('❌ Google Sign-In misslyckades:', {
+                code: error.code,
+                message: error.message,
+                fullError: error
+            });
+            
+            let userMessage = 'Inloggning misslyckades. ';
+            
+            switch (error.code) {
+                case 'auth/popup-closed-by-user':
+                    userMessage += 'Popup stängdes av användaren.';
+                    console.log('ℹ️ Användaren stängde popup-fönstret');
+                    break;
+                case 'auth/popup-blocked':
+                    userMessage += 'Popup blockerades av webbläsaren. Tillåt popups för denna sida.';
+                    console.log('🚫 Popup blockerades av webbläsaren');
+                    break;
+                case 'auth/unauthorized-domain':
+                    userMessage += 'Domänen är inte auktoriserad. Kontakta administratören.';
+                    console.log('🚫 Unauthorized domain - lägg till i Firebase Console');
+                    break;
+                case 'auth/operation-not-allowed':
+                    userMessage += 'Google Sign-In inte aktiverat. Kontakta administratören.';
+                    console.log('🚫 Google Sign-In inte aktiverat i Firebase Console');
+                    break;
+                default:
+                    userMessage += `Fel: ${error.message}`;
+            }
+            
+            if (window.showToast) {
+                window.showToast(userMessage, 'error');
+            }
             return false;
         }
     }

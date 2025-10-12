@@ -3749,7 +3749,7 @@ function showProfile() {
         const avgResponseTime = achievementsStats.responseTimes.length > 0 ?
             Math.round(achievementsStats.responseTimes.reduce((a, b) => a + b, 0) / achievementsStats.responseTimes.length / 1000 * 10) / 10 : 0;
         
-        // User info HTML (goes to playerStats) - Left column with profile, right column with stats
+        // User info HTML (goes to playerStats) - Left column with profile + auth buttons, right column with stats
         let userInfoHtml = `
             <div class="profile-layout-container">
                 <div class="profile-left-column">
@@ -3758,6 +3758,28 @@ function showProfile() {
                         <div class="player-info">
                             <h3>${playerName}</h3>
                             <p class="player-title">${getPlayerTitle(achievementsProgress.unlocked, accuracy)}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Auth buttons directly under profile in left column -->
+                    <div id="authButtonsSection" class="auth-buttons-section auth-buttons-left">
+                        <!-- Login/Register buttons (shown when not logged in) -->
+                        <div id="authButtons" class="auth-buttons-container">
+                            <button id="loginButton" type="button" class="btn btn-primary auth-btn-profile">
+                                🔐 Logga in
+                            </button>
+                            <button id="registerButton" type="button" class="btn btn-success auth-btn-profile">
+                                ➕ Skapa konto
+                            </button>
+                        </div>
+                        
+                        <!-- Logout button (shown when logged in) -->
+                        <button id="signOut" type="button" class="btn btn-secondary logout-btn" style="display: none;">
+                            🚪 Logga ut
+                        </button>
+                        
+                        <div id="signin-help-profile" class="help-text">
+                            Logga in för att synka dina resultat mellan enheter och se leaderboard
                         </div>
                     </div>
                 </div>

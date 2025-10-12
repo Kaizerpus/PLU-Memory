@@ -683,11 +683,21 @@ class FirebaseManager {
     updateUI(isSignedIn) {
         const signInBtn = document.getElementById('googleSignIn');
         const signOutBtn = document.getElementById('signOut');
+        const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
+        const authButtons = document.getElementById('authButtons'); // Container for login/register buttons
+        const signinHelp = document.getElementById('signin-help-profile'); // Help text
         const userInfo = document.getElementById('userInfo');
         const userInfoMenu = document.getElementById('userInfoMenu');
 
         if (signInBtn) signInBtn.style.display = isSignedIn ? 'none' : 'block';
         if (signOutBtn) signOutBtn.style.display = isSignedIn ? 'block' : 'none';
+        
+        // Handle profile page auth buttons
+        if (loginButton) loginButton.style.display = isSignedIn ? 'none' : 'block';
+        if (registerButton) registerButton.style.display = isSignedIn ? 'none' : 'block';
+        if (authButtons) authButtons.style.display = isSignedIn ? 'none' : 'flex';
+        if (signinHelp) signinHelp.style.display = isSignedIn ? 'none' : 'block';
         
         // Update profile page userInfo (if it exists)
         if (userInfo && currentUser) {

@@ -7,7 +7,7 @@
     <meta name="keywords" content="PLU, produktkoder, ICA, träning, spel, lärande">
     <meta name="author" content="ICA Training App">
     <title>PLU Memory - Träna dina produktkoder</title>
-    <link rel="stylesheet" href="style.css?v=20251012-29">
+    <link rel="stylesheet" href="style.css?v=20251012-31">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
     <meta name="theme-color" content="#dc3545">
     
@@ -580,7 +580,7 @@
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toastContainer"></div>
     
-    <script src="game-clean-v2024.js?v=20251012-30"></script>
+    <script src="game-clean-v2024.js?v=20251012-31"></script>
     <script>
         // Register Service Worker for offline support
         if ('serviceWorker' in navigator) {
@@ -620,6 +620,23 @@
     </script>
     
     <!-- Firebase Configuration -->
-    <script src="firebase-config.js?v=20251012-26"></script>
+    <script src="firebase-config.js?v=20251012-31"></script>
+    
+    <!-- Firebase Initialization -->
+    <script>
+        // Initiera Firebase när sidan laddas
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (window.FirebaseManager) {
+                console.log('🔥 Startar Firebase initialisering...');
+                window.firebaseManager = new FirebaseManager();
+                const success = await window.firebaseManager.initialize();
+                if (success) {
+                    console.log('✅ Firebase framgångsrikt initialiserat');
+                } else {
+                    console.log('⚠️ Firebase initialisering misslyckades - fortsätter i offline-läge');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

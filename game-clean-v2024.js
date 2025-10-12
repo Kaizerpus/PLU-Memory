@@ -3494,15 +3494,80 @@ function showLeaderboard() {
     hideSection('menuButtons');
     showSection('leaderboard');
     
-    // Hämta och visa riktiga highscores
+    // Hämta och visa globala topplistan från Firebase
     const leaderboardList = document.getElementById('leaderboardList');
-    if (leaderboardList && window.highscoreManager) {
+    if (leaderboardList) {
+        leaderboardList.innerHTML = '<p>⏳ Laddar global topplista...</p>';
+        
+        if (window.firebaseManager && window.firebaseManager.isInitialized) {
+            // Hämta global topplista från Firebase
+            window.firebaseManager.getLeaderboard(10).then(globalScores => {
+                if (globalScores.length === 0) {
+                    leaderboardList.innerHTML = '<p>🏆 Inga resultat än. Bli först på topplistan!</p>';
+                } else {
+                    let html = '<div class="leaderboard-header"><h3>🏆 Global Topplista</h3><p>De 10 bästa resultaten från alla spelare</p></div>';
+                    html += '<ol class="highscore-list global-leaderboard">';
+                    
+                    globalScores.forEach((entry, index) => {
+                        const rank = index + 1;
+                        let rankIcon = '';
+                        let rankClass = '';
+                        
+                        if (rank === 1) {
+                            rankIcon = '🥇';
+                            rankClass = 'rank-gold';
+                        } else if (rank === 2) {
+                            rankIcon = '🥈';
+                            rankClass = 'rank-silver';
+                        } else if (rank === 3) {
+                            rankIcon = '🥉';
+                            rankClass = 'rank-bronze';
+                        } else {
+                            rankIcon = `#${rank}`;
+                            rankClass = 'rank-normal';
+                        }
+                        
+                        const gamesText = entry.totalGamesPlayed === 1 ? 'spel' : 'spel';
+                        
+                        html += `
+                            <li class="highscore-entry ${rankClass}">
+                                <div class="rank">${rankIcon}</div>
+                                <div class="player-info">
+                                    <div class="player-name">${entry.displayName || 'Anonym spelare'}</div>
+                                    <div class="score-details">
+                                        <span class="percentage">${entry.bestScore}%</span>
+                                        <span class="games-played">(${entry.totalGamesPlayed} ${gamesText})</span>
+                                    </div>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    
+                    html += '</ol>';
+                    leaderboardList.innerHTML = html;
+                }
+            }).catch(error => {
+                console.error('❌ Fel vid hämtning av global topplista:', error);
+                // Fallback till lokal topplista om Firebase misslyckas
+                showLocalLeaderboard(leaderboardList);
+            });
+        } else {
+            // Fallback till lokal topplista om Firebase inte är tillgängligt
+            showLocalLeaderboard(leaderboardList);
+        }
+    }
+}
+
+function showLocalLeaderboard(leaderboardList) {
+    console.log('Visar lokal topplista som fallback');
+    if (window.highscoreManager) {
         const topScores = window.highscoreManager.getTopScores(10);
         
         if (topScores.length === 0) {
-            leaderboardList.innerHTML = '<p>Inga resultat än. Spela ditt första spel!</p>';
+            leaderboardList.innerHTML = '<p>📊 Inga lokala resultat än. Spela ditt första spel!</p>';
         } else {
-            let html = '<ol class="highscore-list">';
+            let html = '<div class="leaderboard-header"><h3>📊 Lokal Topplista</h3><p>Dina bästa resultat (ingen internetuppkoppling)</p></div>';
+            html += '<ol class="highscore-list local-leaderboard">';
             
             topScores.forEach((score, index) => {
                 const rank = index + 1;
@@ -3550,8 +3615,8 @@ function showLeaderboard() {
             html += '</ol>';
             leaderboardList.innerHTML = html;
         }
-    } else if (leaderboardList) {
-        leaderboardList.innerHTML = '<p>Topplistan kunde inte laddas.</p>';
+    } else {
+        leaderboardList.innerHTML = '<p>❌ Topplistan kunde inte laddas.</p>';
     }
 }
 
@@ -4843,6 +4908,23 @@ async function checkAchievements() {
     
     const stats = JSON.parse(localStorage.getItem('gameStats') || '{}');
     const streak = parseInt(localStorage.getItem('currentStreak') || '0');
+    
+    // Spara spelets resultat till Firebase
+    const percentage = Math.round((score / totalQuestions) * 100);
+    const currentBestScore = parseInt(localStorage.getItem('bestScore') || '0');
+    
+    // Uppdatera lokal bestScore om detta resultat är bättre
+    if (percentage > currentBestScore) {
+        localStorage.setItem('bestScore', percentage.toString());
+        console.log('🏆 Nytt personligt rekord:', percentage + '%');
+    }
+    
+    // Spara till Firebase (inkluderar automatisk uppdatering av bestScore)
+    if (window.dataManager) {
+        const gameData = window.dataManager.collectGameData();
+        await window.firebaseManager.saveUserData(gameData);
+        console.log('💾 Speldata sparad till Firebase:', gameData);
+    }
     
     // Första seger
     if (stats.totalCorrectAnswers >= 1) {

@@ -5099,6 +5099,48 @@ button:active, .btn:active {
     margin-top: 10px;
 }
 
+/* Leaderboard header styling */
+.leaderboard-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    color: white;
+}
+
+.leaderboard-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.4rem;
+}
+
+.leaderboard-header p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Global vs Local leaderboard distinction */
+.global-leaderboard .highscore-entry {
+    border-left: 4px solid #28a745;
+}
+
+.local-leaderboard .highscore-entry {
+    border-left: 4px solid #6c757d;
+}
+
+.global-leaderboard .rank-gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+}
+
+.global-leaderboard .rank-silver {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+}
+
+.global-leaderboard .rank-bronze {
+    background: linear-gradient(135deg, #cd7f32 0%, #deb887 100%);
+}
+
 /* Achievement Modal */
 .achievement-modal .modal-content {
     background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);

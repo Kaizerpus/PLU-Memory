@@ -7,7 +7,7 @@
     <meta name="keywords" content="PLU, produktkoder, ICA, träning, spel, lärande">
     <meta name="author" content="ICA Training App">
     <title>PLU Memory - Träna dina produktkoder</title>
-    <link rel="stylesheet" href="style.css?v=20251012-23">
+    <link rel="stylesheet" href="style.css?v=20251012-24">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
     <meta name="theme-color" content="#dc3545">
     
@@ -274,14 +274,15 @@
                 <button id="backToMenuFromProfile" type="button" class="btn btn-outline back-btn" role="button">← Tillbaka till meny</button>
             </div>
             
-            <!-- User Info Section -->
-            <div id="userInfoSection" class="user-info-section">
-                <div id="userInfoMenu" class="user-info-display">
-                    <span>Inte inloggad - data sparas lokalt</span>
-                </div>
+            <div id="profileContent" 
+                 role="tabpanel" 
+                 aria-labelledby="profile-title"
+                 aria-describedby="profile-description">
+                <div id="playerStats" role="region" aria-labelledby="player-stats-heading"></div>
+                <h4 id="player-stats-heading" class="sr-only" aria-level="4">Spelarstatistik</h4>
             </div>
             
-            <!-- Auth buttons section -->
+            <!-- Auth buttons section - placed after existing playerStats -->
             <div id="authButtonsSection" class="auth-buttons-section">
                 <!-- Login/Register buttons (shown when not logged in) -->
                 <div id="authButtons" class="auth-buttons-container">
@@ -312,13 +313,6 @@
                         role="button"
                         aria-describedby="reset-warning">Nollställ statistik</button>
                 <div id="reset-warning" class="help-text sr-only">VARNING: Detta raderar all spelstatistik permanent</div>
-            </div>
-            <div id="profileContent" 
-                 role="tabpanel" 
-                 aria-labelledby="profile-title"
-                 aria-describedby="profile-description">
-                <div id="playerStats" role="region" aria-labelledby="player-stats-heading"></div>
-                <h4 id="player-stats-heading" class="sr-only" aria-level="4">Spelarstatistik</h4>
             </div>
             <div id="profile-description" class="sr-only">Detaljerad statistik över dina spelresultat och prestationer</div>
         </section>

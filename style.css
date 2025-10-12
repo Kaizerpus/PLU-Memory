@@ -5050,25 +5050,9 @@ button:active, .btn:active {
     transform: translateY(-2px);
 }
 
-/* User Info Section */
-.user-info-section {
-    margin-bottom: 25px;
-}
-
-.user-info-display {
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-/* Auth Buttons Section */
+/* Auth Buttons Section - placed after existing playerStats */
 .auth-buttons-section {
-    margin-bottom: 30px;
+    margin: 25px 0 30px 0;
 }
 
 .auth-buttons-container {
@@ -5157,11 +5141,6 @@ button:active, .btn:active {
 @media (max-width: 768px) {
     .back-btn {
         padding: 10px 20px;
-        font-size: 14px;
-    }
-    
-    .user-info-display {
-        padding: 15px;
         font-size: 14px;
     }
     

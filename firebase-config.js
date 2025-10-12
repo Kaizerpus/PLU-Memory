@@ -544,6 +544,7 @@ class FirebaseManager {
 
         try {
             const snapshot = await db.collection('users')
+                .where('gameData.totalGamesPlayed', '>', 0) // Endast användare som spelat minst 1 spel
                 .orderBy('gameData.bestScore', 'desc')
                 .limit(limit)
                 .get();
@@ -552,8 +553,9 @@ class FirebaseManager {
                 id: doc.id,
                 displayName: doc.data().displayName,
                 bestScore: doc.data().gameData?.bestScore || 0,
-                totalGamesPlayed: doc.data().gameData?.totalGamesPlayed || 0
-            }));
+                totalGamesPlayed: doc.data().gameData?.totalGamesPlayed || 0,
+                bestScoreDetails: doc.data().gameData?.bestScoreDetails || null // För att visa produkter/kategori
+            })).filter(user => user.bestScore > 0); // Extra säkerhet - bara användare med poäng > 0
             
         } catch (error) {
             console.error('❌ Kunde inte ladda leaderboard:', error);

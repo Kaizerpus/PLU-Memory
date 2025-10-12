@@ -7,9 +7,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Användardata - ägaren kan läsa/skriva sin egen data, moderatorer kan läsa alla
+    // Användardata - ägaren kan läsa/skriva sin egen data, alla kan läsa för topplista
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Tillåt alla inloggade att läsa användardata för topplistan
+      allow read: if request.auth != null;
+      // Moderatorer kan läsa alla (för admin-funktioner)
       allow read: if request.auth != null && (
         get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.role in ['admin', 'moderator']
       );
@@ -44,6 +47,22 @@ service cloud.firestore {
   }
 }
 ```
+
+## Firestore Index som behövs:
+
+Du behöver skapa ett **composite index** i Firebase Console för den nya leaderboard-queryn:
+
+1. **Gå till Firebase Console**: https://console.firebase.google.com/
+2. **Firestore Database** → **Indexes** → **Composite indexes**
+3. **Add index** med följande inställningar:
+   - **Collection ID**: `users`
+   - **Fields to index**:
+     - `gameData.totalGamesPlayed` - **Ascending**
+     - `gameData.bestScore` - **Descending**
+   - **Query scope**: Collection
+4. **Create index**
+
+Alternativt kommer Firebase automatiskt föreslå detta index första gången queryn körs.
 
 ## Hur du uppdaterar reglerna:
 

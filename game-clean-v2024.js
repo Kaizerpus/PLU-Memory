@@ -1193,6 +1193,7 @@ class DataManager {
                 totalGamesPlayed: parseInt(localStorage.getItem('totalGamesPlayed') || '0'),
                 totalCorrectAnswers: parseInt(localStorage.getItem('totalCorrectAnswers') || '0'),
                 bestScore: parseInt(localStorage.getItem('bestScore') || '0'),
+                bestScoreDetails: JSON.parse(localStorage.getItem('bestScoreDetails') || 'null'),
                 totalPlayTime: parseInt(localStorage.getItem('totalPlayTime') || '0'),
                 averageResponseTime: parseFloat(localStorage.getItem('averageResponseTime') || '0'),
                 streakRecord: parseInt(localStorage.getItem('streakRecord') || '0')
@@ -3527,7 +3528,21 @@ function showLeaderboard() {
                             rankClass = 'rank-normal';
                         }
                         
-                        const gamesText = entry.totalGamesPlayed === 1 ? 'spel' : 'spel';
+                        // Visa information om det bästa resultatet
+                        let gameInfo = '';
+                        if (entry.bestScoreDetails) {
+                            const details = entry.bestScoreDetails;
+                            const categoryText = details.categories === 'alla' ? 'Alla kategorier' : 
+                                details.categories.charAt(0).toUpperCase() + details.categories.slice(1);
+                            const difficultyText = details.difficulty === 'alla' ? 'Alla nivåer' : 
+                                details.difficulty.charAt(0).toUpperCase() + details.difficulty.slice(1);
+                            
+                            gameInfo = `(${details.score}/${details.totalQuestions} ${categoryText})`;
+                        } else {
+                            // Fallback för användare utan detaljerad data
+                            const estimatedProducts = Math.round(entry.totalGamesPlayed * 8); // Ungefär 8 produkter per spel i snitt
+                            gameInfo = `(~${estimatedProducts} produkter tränade)`;
+                        }
                         
                         html += `
                             <li class="highscore-entry ${rankClass}">
@@ -3536,7 +3551,7 @@ function showLeaderboard() {
                                     <div class="player-name">${entry.displayName || 'Anonym spelare'}</div>
                                     <div class="score-details">
                                         <span class="percentage">${entry.bestScore}%</span>
-                                        <span class="games-played">(${entry.totalGamesPlayed} ${gamesText})</span>
+                                        <span class="games-played">${gameInfo}</span>
                                     </div>
                                 </div>
                             </li>
@@ -4913,9 +4928,28 @@ async function checkAchievements() {
     const percentage = Math.round((score / totalQuestions) * 100);
     const currentBestScore = parseInt(localStorage.getItem('bestScore') || '0');
     
+    // Hämta filter-information för bästa resultat-detaljer
+    const categoryFilter = document.getElementById('categoryFilter');
+    const difficultyFilter = document.getElementById('difficultyFilter');
+    const categories = categoryFilter ? categoryFilter.value : 'alla';
+    const difficulty = difficultyFilter ? difficultyFilter.value : 'alla';
+    
     // Uppdatera lokal bestScore om detta resultat är bättre
     if (percentage > currentBestScore) {
         localStorage.setItem('bestScore', percentage.toString());
+        
+        // Spara detaljer om det bästa resultatet
+        const bestScoreDetails = {
+            score: score,
+            totalQuestions: totalQuestions,
+            percentage: percentage,
+            categories: categories,
+            difficulty: difficulty,
+            date: new Date().toLocaleDateString('sv-SE'),
+            timestamp: Date.now()
+        };
+        localStorage.setItem('bestScoreDetails', JSON.stringify(bestScoreDetails));
+        
         console.log('🏆 Nytt personligt rekord:', percentage + '%');
     }
     

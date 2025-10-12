@@ -1,13 +1,15 @@
 // Firebase konfiguration för PLU Memory Game
-// Du behöver ersätta värdena nedan med dina egna från Firebase Console
+// ⚠️ VIKTIGT: Ersätt värdena nedan med dina egna från Firebase Console
+// Se FIREBASE-SETUP.md för detaljerade instruktioner
 
 const firebaseConfig = {
- apiKey: "AIzaSyD-your-actual-key-here",
-  authDomain: "plu-memory-game.firebaseapp.com",
-  projectId: "plu-memory-game",
-  storageBucket: "plu-memory-game.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef123456789"
+ apiKey: "AIzaSyBomzD9K7HgrR2A5vHBl6O_ovKMQS4tISE",
+  authDomain: "plu-memory.firebaseapp.com",
+  projectId: "plu-memory",
+  storageBucket: "plu-memory.firebasestorage.app",
+  messagingSenderId: "688682728129",
+  appId: "1:688682728129:web:35286ebe42844f98303240",
+  measurementId: "G-2XHS3S9BMJ"
 };
 
 // Firebase-moduler som laddas från CDN
@@ -406,6 +408,3 @@ window.firebaseManager = new FirebaseManager();
 document.addEventListener('DOMContentLoaded', async () => {
     await window.firebaseManager.initialize();
 });
-
-
-export default window.firebaseManager;

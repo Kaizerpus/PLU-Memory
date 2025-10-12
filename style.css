@@ -5269,6 +5269,31 @@ button:active, .btn:active {
     font-weight: 500;
 }
 
+/* Profile sections in two columns */
+.profile-sections-row {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.profile-sections-row .recent-scores,
+.profile-sections-row .achievements-summary {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.profile-sections-row h4 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #ffffff;
+    font-size: 1.3rem;
+    text-align: center;
+}
+
 /* Mobile responsiveness for new profile structure */
 @media (max-width: 768px) {
     .back-btn {
@@ -5328,6 +5353,23 @@ button:active, .btn:active {
     .auth-buttons-left .help-text {
         font-size: 11px;
         margin-top: 12px;
+    }
+    
+    /* Stack profile sections on mobile */
+    .profile-sections-row {
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .profile-sections-row .recent-scores,
+    .profile-sections-row .achievements-summary {
+        padding: 20px;
+    }
+    
+    .profile-sections-row h4 {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
     }
 }
 

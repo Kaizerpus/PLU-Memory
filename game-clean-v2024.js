@@ -3838,9 +3838,9 @@ function showProfile() {
             </div>
         `;
         
-        // Stats sections HTML (goes to profileStats)  
+        // Stats sections HTML (goes to profileStats) - Two columns side by side
         let statsHtml = `
-            <div class="profile-sections">
+            <div class="profile-sections-row">
                 <div class="recent-scores">
                     <h4>🏅 Dina bästa resultat</h4>
                     ${playerScores.length > 0 ? `

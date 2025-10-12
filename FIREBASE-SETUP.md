@@ -24,10 +24,33 @@
 6. Lägg till din e-post som "Project support email"
 7. Klicka "Save"
 
-### 2.2 Lägg till din domän
+### 2.2 Aktivera E-post/Lösenord Sign-In
+1. I "Sign-in method", klicka på "Email/Password"
+2. Aktivera "Enable" för första alternativet (Email/Password)
+3. Du kan också aktivera "Email link (passwordless sign-in)" om du vill
+4. Klicka "Save"
+
+### 2.3 Aktivera Apple Sign-In (valfritt)
+1. I "Sign-in method", klicka på "Apple"
+2. Aktivera "Enable"
+3. **Service ID**: Lämna tom för webbanvändning
+4. **Apple Team ID**: Behövs bara för iOS/macOS appar
+5. **Private Key ID**: Behövs bara för iOS/macOS appar
+6. **Private Key**: Behövs bara för iOS/macOS appar
+7. Klicka "Save"
+
+**OBS:** Apple Sign-In fungerar bäst på Safari och iOS-enheter. På andra webbläsare kan den visa ett popup-fönster.
+
+### 2.4 Lägg till din domän
 1. Scrolla ner till "Authorized domains"
 2. Lägg till din GitHub Pages URL: `dittanvändarnamn.github.io`
 3. Lägg även till `localhost` för lokal testning
+
+### 2.5 Konfigurera e-postmallar (valfritt)
+För e-post/lösenord-autentisering kan du anpassa e-postmallarna:
+1. Gå till "Authentication" → "Templates"
+2. Anpassa "Password reset", "Email address verification" etc.
+3. Ändra språk till svenska om du vill
 
 ## Steg 3: Konfigurera Firestore Database
 
@@ -139,7 +162,10 @@ php -S localhost:8000
 När Firebase är konfigurerat får du:
 
 ### 🔐 Autentisering
-- Logga in med Google-konto
+- **Google Sign-In** - Logga in med Google-konto
+- **Apple Sign-In** - Logga in med Apple ID/iCloud (bäst på Safari/iOS)
+- **E-post/Lösenord** - Skapa konto eller logga in med e-postadress
+- **Lösenordsåterställning** - Glömt lösenord via e-post
 - Säker användaridentifiering
 - Automatisk utloggning vid behov
 
@@ -173,8 +199,11 @@ När Firebase är konfigurerat får du:
 - Se till att inget värde fortfarande är "DIN_API_KEY_HÄR"
 
 ### Problem: "Sign-in fungerar inte"
-- Kontrollera att din domän är tillagd i "Authorized domains"
+- **Google**: Kontrollera att din domän är tillagd i "Authorized domains"
+- **Apple**: Fungerar bäst på Safari och iOS-enheter
+- **E-post**: Kontrollera att Email/Password är aktiverat i Firebase Console
 - För GitHub Pages: `dittanvändarnamn.github.io`
+- Kontrollera att popup-blockerare inte blockerar inloggning
 
 ### Problem: "Kan inte spara data"
 - Kontrollera Firestore-reglerna

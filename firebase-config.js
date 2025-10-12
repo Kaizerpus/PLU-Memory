@@ -284,6 +284,223 @@ class FirebaseManager {
         }
     }
 
+    // Apple Sign-In
+    async signInWithApple() {
+        console.log('🍎 Startar Apple Sign-In process...');
+        
+        if (!this.isInitialized) {
+            console.error('❌ Firebase inte initialiserat');
+            if (window.showToast) {
+                window.showToast('Firebase inte initialiserat. Försök igen senare.', 'error');
+            }
+            return false;
+        }
+        
+        try {
+            const provider = new firebase.auth.OAuthProvider('apple.com');
+            provider.setCustomParameters({ locale: 'sv' });
+            provider.addScope('email');
+            provider.addScope('name');
+            
+            console.log('🪟 Öppnar Apple Sign-In popup...');
+            const result = await auth.signInWithPopup(provider);
+            
+            console.log('✅ Apple Sign-In framgångsrik:', {
+                user: result.user.displayName || result.user.email,
+                email: result.user.email,
+                uid: result.user.uid
+            });
+            
+            if (window.showToast) {
+                const displayName = result.user.displayName || result.user.email?.split('@')[0] || 'Apple-användare';
+                window.showToast(`Välkommen ${displayName}! 🍎`, 'success');
+            }
+            
+            setTimeout(() => {
+                this.syncUserData();
+            }, 1000);
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Apple Sign-In misslyckades:', error);
+            
+            let userMessage = 'Apple-inloggning misslyckades. ';
+            
+            switch (error.code) {
+                case 'auth/popup-closed-by-user':
+                    userMessage += 'Popup stängdes av användaren.';
+                    break;
+                case 'auth/popup-blocked':
+                    userMessage += 'Popup blockerades av webbläsaren.';
+                    break;
+                case 'auth/operation-not-allowed':
+                    userMessage += 'Apple Sign-In inte aktiverat.';
+                    break;
+                default:
+                    userMessage += `Fel: ${error.message}`;
+            }
+            
+            if (window.showToast) {
+                window.showToast(userMessage, 'error');
+            }
+            return false;
+        }
+    }
+
+    // Email/Password Sign-In
+    async signInWithEmail(email, password) {
+        console.log('📧 Startar Email Sign-In process...');
+        
+        if (!this.isInitialized) {
+            console.error('❌ Firebase inte initialiserat');
+            return false;
+        }
+        
+        try {
+            const result = await auth.signInWithEmailAndPassword(email, password);
+            
+            console.log('✅ Email Sign-In framgångsrik:', {
+                user: result.user.email,
+                uid: result.user.uid
+            });
+            
+            if (window.showToast) {
+                const displayName = result.user.displayName || result.user.email?.split('@')[0] || 'E-post-användare';
+                window.showToast(`Välkommen ${displayName}! 📧`, 'success');
+            }
+            
+            setTimeout(() => {
+                this.syncUserData();
+            }, 1000);
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Email Sign-In misslyckades:', error);
+            
+            let userMessage = 'E-post-inloggning misslyckades. ';
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    userMessage += 'Ingen användare hittades med denna e-post.';
+                    break;
+                case 'auth/wrong-password':
+                    userMessage += 'Fel lösenord.';
+                    break;
+                case 'auth/invalid-email':
+                    userMessage += 'Ogiltig e-postadress.';
+                    break;
+                case 'auth/user-disabled':
+                    userMessage += 'Kontot är inaktiverat.';
+                    break;
+                default:
+                    userMessage += `Fel: ${error.message}`;
+            }
+            
+            if (window.showToast) {
+                window.showToast(userMessage, 'error');
+            }
+            return false;
+        }
+    }
+
+    // Email/Password Registration
+    async registerWithEmail(email, password) {
+        console.log('📧 Startar Email Registration process...');
+        
+        if (!this.isInitialized) {
+            console.error('❌ Firebase inte initialiserat');
+            return false;
+        }
+        
+        try {
+            const result = await auth.createUserWithEmailAndPassword(email, password);
+            
+            console.log('✅ Email Registration framgångsrik:', {
+                user: result.user.email,
+                uid: result.user.uid
+            });
+            
+            if (window.showToast) {
+                window.showToast('Konto skapat! Välkommen! 🎉', 'success');
+            }
+            
+            setTimeout(() => {
+                this.syncUserData();
+            }, 1000);
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Email Registration misslyckades:', error);
+            
+            let userMessage = 'Registrering misslyckades. ';
+            
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    userMessage += 'E-postadressen används redan.';
+                    break;
+                case 'auth/invalid-email':
+                    userMessage += 'Ogiltig e-postadress.';
+                    break;
+                case 'auth/weak-password':
+                    userMessage += 'Lösenordet är för svagt.';
+                    break;
+                default:
+                    userMessage += `Fel: ${error.message}`;
+            }
+            
+            if (window.showToast) {
+                window.showToast(userMessage, 'error');
+            }
+            return false;
+        }
+    }
+
+    // Password Reset
+    async resetPassword(email) {
+        console.log('🔑 Startar Password Reset process...');
+        
+        if (!this.isInitialized) {
+            console.error('❌ Firebase inte initialiserat');
+            return false;
+        }
+        
+        try {
+            await auth.sendPasswordResetEmail(email);
+            
+            console.log('✅ Password Reset email skickat');
+            
+            if (window.showToast) {
+                window.showToast('Återställningslänk skickad till din e-post! 📧', 'success');
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Password Reset misslyckades:', error);
+            
+            let userMessage = 'Lösenordsåterställning misslyckades. ';
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    userMessage += 'Ingen användare hittades med denna e-post.';
+                    break;
+                case 'auth/invalid-email':
+                    userMessage += 'Ogiltig e-postadress.';
+                    break;
+                default:
+                    userMessage += `Fel: ${error.message}`;
+            }
+            
+            if (window.showToast) {
+                window.showToast(userMessage, 'error');
+            }
+            return false;
+        }
+    }
+
     async saveUserData(userData) {
         if (!this.isInitialized || !currentUser) {
             console.log('🚫 Kan inte spara - Firebase inte initialiserat eller användare inte inloggad');
@@ -863,4 +1080,261 @@ window.firebaseManager = new FirebaseManager();
 // Auto-initiera när sidan laddas
 document.addEventListener('DOMContentLoaded', async () => {
     await window.firebaseManager.initialize();
+    
+    // Lägg till event listeners för autentiseringsknapparna
+    setupAuthButtons();
+});
+
+// Setup authentication button event listeners
+function setupAuthButtons() {
+    // Main auth buttons
+    const loginBtn = document.getElementById('loginButton');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            openAuthProviderModal();
+        });
+    }
+    
+    const registerBtn = document.getElementById('registerButton');
+    if (registerBtn) {
+        registerBtn.addEventListener('click', () => {
+            openEmailAuth('signup');
+        });
+    }
+    
+    // Sign Out
+    const signOutBtn = document.getElementById('signOut');
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', async () => {
+            await window.firebaseManager.signOut();
+        });
+    }
+}
+
+// Provider selection modal functions
+function openAuthProviderModal() {
+    const modal = document.getElementById('authProviderModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function closeAuthModal() {
+    const modal = document.getElementById('authProviderModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Provider functions called from modal
+async function signInWithGoogle() {
+    closeAuthModal();
+    await window.firebaseManager.signInWithGoogle();
+}
+
+async function signInWithApple() {
+    closeAuthModal();
+    await window.firebaseManager.signInWithApple();
+}
+
+function openEmailAuth(mode = 'signin') {
+    closeAuthModal();
+    const modal = document.getElementById('emailAuthModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        showEmailTab(mode);
+        const focusInput = mode === 'signup' ? 'signup-email' : 'signin-email';
+        document.getElementById(focusInput)?.focus();
+    }
+}
+
+// E-post autentisering modala funktioner
+function openEmailModal() {
+    const modal = document.getElementById('emailAuthModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        showEmailTab('signin');
+        document.getElementById('signin-email')?.focus();
+    }
+}
+
+function closeEmailModal() {
+    const modal = document.getElementById('emailAuthModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        clearEmailForms();
+        hideEmailMessage();
+    }
+}
+
+function showEmailTab(tab) {
+    // Hide all forms
+    document.querySelectorAll('.email-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected form and activate tab
+    if (tab === 'signin') {
+        document.getElementById('signin-form')?.classList.add('active');
+        document.getElementById('signin-tab')?.classList.add('active');
+        document.getElementById('signin-email')?.focus();
+    } else if (tab === 'signup') {
+        document.getElementById('signup-form')?.classList.add('active');
+        document.getElementById('signup-tab')?.classList.add('active');
+        document.getElementById('signup-email')?.focus();
+    }
+    
+    hideEmailMessage();
+}
+
+function showForgotPassword() {
+    // Hide all forms
+    document.querySelectorAll('.email-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show forgot password form
+    document.getElementById('forgot-form')?.classList.add('active');
+    document.getElementById('forgot-email')?.focus();
+    
+    hideEmailMessage();
+}
+
+function clearEmailForms() {
+    document.querySelectorAll('.email-form input').forEach(input => {
+        input.value = '';
+    });
+}
+
+function showEmailMessage(message, type = 'info') {
+    const messageDiv = document.getElementById('email-auth-messages');
+    if (messageDiv) {
+        messageDiv.textContent = message;
+        messageDiv.className = `auth-messages show ${type}`;
+    }
+}
+
+function hideEmailMessage() {
+    const messageDiv = document.getElementById('email-auth-messages');
+    if (messageDiv) {
+        messageDiv.className = 'auth-messages';
+    }
+}
+
+async function handleEmailSignIn(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('signin-email')?.value;
+    const password = document.getElementById('signin-password')?.value;
+    
+    if (!email || !password) {
+        showEmailMessage('Vänligen fyll i alla fält.', 'error');
+        return;
+    }
+    
+    showEmailMessage('Loggar in...', 'info');
+    
+    const success = await window.firebaseManager.signInWithEmail(email, password);
+    if (success) {
+        closeEmailModal();
+    } else {
+        // Error message already shown by firebaseManager
+    }
+}
+
+async function handleEmailSignUp(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('signup-email')?.value;
+    const password = document.getElementById('signup-password')?.value;
+    const confirm = document.getElementById('signup-confirm')?.value;
+    
+    if (!email || !password || !confirm) {
+        showEmailMessage('Vänligen fyll i alla fält.', 'error');
+        return;
+    }
+    
+    if (password !== confirm) {
+        showEmailMessage('Lösenorden matchar inte.', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showEmailMessage('Lösenordet måste vara minst 6 tecken.', 'error');
+        return;
+    }
+    
+    showEmailMessage('Skapar konto...', 'info');
+    
+    const success = await window.firebaseManager.registerWithEmail(email, password);
+    if (success) {
+        closeEmailModal();
+    } else {
+        // Error message already shown by firebaseManager
+    }
+}
+
+async function handleForgotPassword(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('forgot-email')?.value;
+    
+    if (!email) {
+        showEmailMessage('Vänligen ange din e-postadress.', 'error');
+        return;
+    }
+    
+    showEmailMessage('Skickar återställningslänk...', 'info');
+    
+    const success = await window.firebaseManager.resetPassword(email);
+    if (success) {
+        showEmailMessage('Återställningslänk skickad! Kontrollera din e-post.', 'success');
+        setTimeout(() => {
+            showEmailTab('signin');
+        }, 3000);
+    } else {
+        // Error message already shown by firebaseManager
+    }
+}
+
+// Keyboard navigation för modaler
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        const authModal = document.getElementById('authProviderModal');
+        const emailModal = document.getElementById('emailAuthModal');
+        
+        if (authModal && !authModal.classList.contains('hidden')) {
+            closeAuthModal();
+        } else if (emailModal && !emailModal.classList.contains('hidden')) {
+            closeEmailModal();
+        }
+    }
+});
+
+// Close modals when clicking outside
+document.addEventListener('click', (event) => {
+    const authModal = document.getElementById('authProviderModal');
+    const emailModal = document.getElementById('emailAuthModal');
+    
+    if (authModal && !authModal.classList.contains('hidden')) {
+        if (event.target === authModal || event.target.classList.contains('modal-overlay')) {
+            closeAuthModal();
+        }
+    }
+    
+    if (emailModal && !emailModal.classList.contains('hidden')) {
+        if (event.target === emailModal || event.target.classList.contains('modal-overlay')) {
+            closeEmailModal();
+        }
+    }
 });

@@ -1139,11 +1139,21 @@ function closeRegisterModal() {
 // Register functions called from register modal
 async function registerWithGoogle() {
     closeRegisterModal();
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt');
+        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        return;
+    }
     await window.firebaseManager.signInWithGoogle();
 }
 
 async function registerWithApple() {
     closeRegisterModal();
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt');
+        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        return;
+    }
     await window.firebaseManager.signInWithApple();
 }
 
@@ -1180,11 +1190,21 @@ function closeAuthModal() {
 // Provider functions called from modal
 async function signInWithGoogle() {
     closeAuthModal();
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt');
+        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        return;
+    }
     await window.firebaseManager.signInWithGoogle();
 }
 
 async function signInWithApple() {
     closeAuthModal();
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt');
+        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        return;
+    }
     await window.firebaseManager.signInWithApple();
 }
 
@@ -1398,4 +1418,31 @@ document.addEventListener('click', (event) => {
             closeEmailModal();
         }
     }
+});
+
+// Modal button event listeners - setup after DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+    // Google sign-in buttons  
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const googleRegisterBtn = document.getElementById('googleRegisterBtn');
+    
+    if (googleSignInBtn) {
+        googleSignInBtn.addEventListener('click', signInWithGoogle);
+    }
+    if (googleRegisterBtn) {
+        googleRegisterBtn.addEventListener('click', registerWithGoogle);
+    }
+    
+    // Apple sign-in buttons
+    const appleSignInBtn = document.getElementById('appleSignInBtn');
+    const appleRegisterBtn = document.getElementById('appleRegisterBtn');
+    
+    if (appleSignInBtn) {
+        appleSignInBtn.addEventListener('click', signInWithApple);
+    }
+    if (appleRegisterBtn) {
+        appleRegisterBtn.addEventListener('click', registerWithApple);
+    }
+    
+    console.log('🔗 Modal event listeners setup complete');
 });

@@ -421,7 +421,7 @@
                         <div class="register-option">
                             <h4>🔗 Google-konto</h4>
                             <p>Snabbast och enklast - använd ditt befintliga Google-konto</p>
-                            <button class="provider-btn google-provider" onclick="registerWithGoogle()">
+                            <button class="provider-btn google-provider" id="googleRegisterBtn">
                                 <svg class="google-icon" viewBox="0 0 24 24" width="28" height="28">
                                     <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -436,7 +436,7 @@
                         <div class="register-option">
                             <h4>🍎 Apple-konto</h4>
                             <p>Privat och säkert - fungerar bäst på Safari och iOS</p>
-                            <button class="provider-btn apple-provider" onclick="registerWithApple()">
+                            <button class="provider-btn apple-provider" id="appleRegisterBtn">
                                 <svg class="apple-icon" viewBox="0 0 24 24" width="28" height="28" fill="#000000">
                                     <path d="M12.017 0C8.396 0 8.025.24 8.025 3.302 8.025 6.906 10.73 9.013 14.37 9.013c.474 0 .897-.032 1.248-.08-.08-.315-.482-1.876-.482-2.85 0-2.234 1.727-4.083 1.727-4.083S12.017 0 12.017 0z"/>
                                     <path d="M17.033 10.273c-2.35-.04-4.132 1.197-5.17 1.197-1.037 0-2.64-1.157-4.34-1.124C5.566 10.386 3.65 11.6 2.567 13.482c-2.188 3.8-.56 9.42 1.565 12.5 1.04 1.51 2.28 3.2 3.91 3.14 1.59-.063 2.19-.96 4.11-.96 1.92 0 2.48.96 4.18.93 1.73-.03 2.79-1.52 3.83-3.04 1.204-1.758 1.7-3.463 1.73-3.55-.038-.015-3.32-1.27-3.355-5.04-.03-3.14 2.57-4.64 2.69-4.73-1.467-2.15-3.75-2.4-4.567-2.45z"/>
@@ -475,7 +475,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="auth-provider-buttons">
-                        <button class="provider-btn google-provider" onclick="signInWithGoogle()">
+                        <button class="provider-btn google-provider" id="googleSignInBtn">
                             <svg class="google-icon" viewBox="0 0 24 24" width="28" height="28">
                                 <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -485,7 +485,7 @@
                             <span>Logga in med Google</span>
                         </button>
                         
-                        <button class="provider-btn apple-provider" onclick="signInWithApple()">
+                        <button class="provider-btn apple-provider" id="appleSignInBtn">
                             <svg class="apple-icon" viewBox="0 0 24 24" width="28" height="28" fill="#000000">
                                 <path d="M12.017 0C8.396 0 8.025.24 8.025 3.302 8.025 6.906 10.73 9.013 14.37 9.013c.474 0 .897-.032 1.248-.08-.08-.315-.482-1.876-.482-2.85 0-2.234 1.727-4.083 1.727-4.083S12.017 0 12.017 0z"/>
                                 <path d="M17.033 10.273c-2.35-.04-4.132 1.197-5.17 1.197-1.037 0-2.64-1.157-4.34-1.124C5.566 10.386 3.65 11.6 2.567 13.482c-2.188 3.8-.56 9.42 1.565 12.5 1.04 1.51 2.28 3.2 3.91 3.14 1.59-.063 2.19-.96 4.11-.96 1.92 0 2.48.96 4.18.93 1.73-.03 2.79-1.52 3.83-3.04 1.204-1.758 1.7-3.463 1.73-3.55-.038-.015-3.32-1.27-3.355-5.04-.03-3.14 2.57-4.64 2.69-4.73-1.467-2.15-3.75-2.4-4.567-2.45z"/>
@@ -620,7 +620,7 @@
     </script>
     
     <!-- Firebase Configuration -->
-    <script src="firebase-config.js?v=20251012-31"></script>
+    <script src="firebase-config.js?v=20251012-33"></script>
     
     <!-- Firebase Initialization -->
     <script>

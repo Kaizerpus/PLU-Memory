@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Offline Support</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌐 PLU Memory - Offline Support Test</h1>
+    
+    <div class="status info">
+        <strong>📋 Test Status:</strong>
+        <div id="connectionStatus">Kontrollerar anslutning...</div>
+        <div id="swStatus">Kontrollerar Service Worker...</div>
+        <div id="cacheStatus">Kontrollerar cache...</div>
+    </div>
+
+    <div>
+        <h3>🔧 Test Controls</h3>
+        <button onclick="testServiceWorker()">Test Service Worker</button>
+        <button onclick="testCache()">Test Cache</button>
+        <button onclick="testOfflineMode()">Simulera Offline</button>
+        <button onclick="clearCache()">Rensa Cache</button>
+        <button onclick="openMainGame()">Öppna Huvudspel</button>
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateConnectionStatus() {
+            const status = navigator.onLine ? '🟢 Online' : '🔴 Offline';
+            document.getElementById('connectionStatus').textContent = status;
+        }
+
+        async function testServiceWorker() {
+            log('🔧 Testing Service Worker...', 'info');
+            
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    log('✅ Service Worker registrerad: ' + registration.scope, 'success');
+                    document.getElementById('swStatus').textContent = '✅ Service Worker aktiv';
+                    
+                    // Check if SW is active
+                    if (registration.active) {
+                        log('✅ Service Worker är aktiv och redo', 'success');
+                    } else {
+                        log('⏳ Service Worker installeras...', 'info');
+                    }
+                } catch (error) {
+                    log('❌ Service Worker fel: ' + error.message, 'error');
+                    document.getElementById('swStatus').textContent = '❌ Service Worker fel';
+                }
+            } else {
+                log('❌ Service Worker stöds inte', 'error');
+                document.getElementById('swStatus').textContent = '❌ Stöds inte';
+            }
+        }
+
+        async function testCache() {
+            log('💾 Testing Cache...', 'info');
+            
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    log('📦 Tillgängliga caches: ' + cacheNames.join(', '), 'info');
+                    
+                    const cache = await caches.open('plu-memory-v1');
+                    const keys = await cache.keys();
+                    log('📋 Cachade filer (' + keys.length + '): ' + keys.map(r => r.url.split('/').pop()).join(', '), 'success');
+                    document.getElementById('cacheStatus').textContent = '✅ Cache aktiv (' + keys.length + ' filer)';
+                } catch (error) {
+                    log('❌ Cache fel: ' + error.message, 'error');
+                    document.getElementById('cacheStatus').textContent = '❌ Cache fel';
+                }
+            } else {
+                log('❌ Cache API stöds inte', 'error');
+                document.getElementById('cacheStatus').textContent = '❌ Stöds inte';
+            }
+        }
+
+        function testOfflineMode() {
+            log('📱 Simulerar offline-läge...', 'info');
+            
+            // Simulate offline
+            Object.defineProperty(navigator, 'onLine', {
+                writable: true,
+                value: false
+            });
+            
+            window.dispatchEvent(new Event('offline'));
+            updateConnectionStatus();
+            
+            log('🔴 Nu i offline-läge - testa navigera till huvudspelet', 'info');
+            
+            // Return online after 10 seconds
+            setTimeout(() => {
+                Object.defineProperty(navigator, 'onLine', {
+                    writable: true,
+                    value: true
+                });
+                window.dispatchEvent(new Event('online'));
+                updateConnectionStatus();
+                log('🟢 Tillbaka online', 'success');
+            }, 10000);
+        }
+
+        async function clearCache() {
+            log('🗑️ Rensar cache...', 'info');
+            
+            try {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+                log('✅ Cache rensad', 'success');
+                document.getElementById('cacheStatus').textContent = '🔄 Cache rensad';
+            } catch (error) {
+                log('❌ Fel vid rensning av cache: ' + error.message, 'error');
+            }
+        }
+
+        function openMainGame() {
+            window.open('./index.html', '_blank');
+        }
+
+        // Initialize
+        updateConnectionStatus();
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // Auto-test on load
+        setTimeout(() => {
+            testServiceWorker();
+            setTimeout(testCache, 1000);
+        }, 500);
+
+        log('🚀 Offline test-sida laddad', 'success');
+    </script>
+</body>
+</html>

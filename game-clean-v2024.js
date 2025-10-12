@@ -3749,62 +3749,68 @@ function showProfile() {
         const avgResponseTime = achievementsStats.responseTimes.length > 0 ?
             Math.round(achievementsStats.responseTimes.reduce((a, b) => a + b, 0) / achievementsStats.responseTimes.length / 1000 * 10) / 10 : 0;
         
-        // User info HTML (goes to playerStats)
+        // User info HTML (goes to playerStats) - Left column with profile, right column with stats
         let userInfoHtml = `
-            <div class="profile-header">
-                <div class="player-avatar">👤</div>
-                <div class="player-info">
-                    <h3>${playerName}</h3>
-                    <p class="player-title">${getPlayerTitle(achievementsProgress.unlocked, accuracy)}</p>
-                </div>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">🎯</div>
-                    <div class="stat-content">
-                        <div class="stat-value">${achievementsStats.totalCorrect}</div>
-                        <div class="stat-label">Totalt rätt</div>
+            <div class="profile-layout-container">
+                <div class="profile-left-column">
+                    <div class="profile-header">
+                        <div class="player-avatar">👤</div>
+                        <div class="player-info">
+                            <h3>${playerName}</h3>
+                            <p class="player-title">${getPlayerTitle(achievementsProgress.unlocked, accuracy)}</p>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-content">
-                        <div class="stat-value">${accuracy}%</div>
-                        <div class="stat-label">Träffsäkerhet</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">⚡</div>
-                    <div class="stat-content">
-                        <div class="stat-value">${avgResponseTime}s</div>
-                        <div class="stat-label">Genomsnittlig tid</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">🔥</div>
-                    <div class="stat-content">
-                        <div class="stat-value">${achievementsStats.bestStreak}</div>
-                        <div class="stat-label">Bästa serie</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">🏆</div>
-                    <div class="stat-content">
-                        <div class="stat-value">${achievementsProgress.unlocked}</div>
-                        <div class="stat-label">Achievements</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">📅</div>
-                    <div class="stat-content">
-                        <div class="stat-value">${achievementsStats.playDates.length}</div>
-                        <div class="stat-label">Dagar spelade</div>
+                <div class="profile-right-column">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-content">
+                                <div class="stat-value">${achievementsStats.totalCorrect}</div>
+                                <div class="stat-label">Totalt rätt</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <div class="stat-value">${accuracy}%</div>
+                                <div class="stat-label">Träffsäkerhet</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">⚡</div>
+                            <div class="stat-content">
+                                <div class="stat-value">${avgResponseTime}s</div>
+                                <div class="stat-label">Genomsnittlig tid</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-content">
+                                <div class="stat-value">${achievementsStats.bestStreak}</div>
+                                <div class="stat-label">Bästa serie</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">🏆</div>
+                            <div class="stat-content">
+                                <div class="stat-value">${achievementsProgress.unlocked}</div>
+                                <div class="stat-label">Achievements</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-content">
+                                <div class="stat-value">${achievementsStats.playDates.length}</div>
+                                <div class="stat-label">Dagar spelade</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -5137,11 +5137,117 @@ button:active, .btn:active {
     margin-bottom: 30px;
 }
 
+/* New two-column profile layout */
+.profile-layout-container {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 25px;
+    align-items: flex-start;
+}
+
+.profile-left-column {
+    flex: 1;
+    min-width: 250px;
+}
+
+.profile-right-column {
+    flex: 2;
+    min-width: 300px;
+}
+
+.profile-left-column .profile-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px 25px;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.profile-right-column .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.profile-right-column .stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.profile-right-column .stat-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.profile-right-column .stat-icon {
+    font-size: 2rem;
+    opacity: 0.8;
+}
+
+.profile-right-column .stat-content {
+    flex: 1;
+}
+
+.profile-right-column .stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.profile-right-column .stat-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
 /* Mobile responsiveness for new profile structure */
 @media (max-width: 768px) {
     .back-btn {
         padding: 10px 20px;
         font-size: 14px;
+    }
+    
+    /* Stack profile layout on mobile */
+    .profile-layout-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .profile-left-column,
+    .profile-right-column {
+        flex: none;
+        min-width: unset;
+        width: 100%;
+    }
+    
+    .profile-left-column .profile-header {
+        padding: 20px 15px;
+    }
+    
+    .profile-right-column .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .profile-right-column .stat-card {
+        padding: 15px;
+    }
+    
+    .profile-right-column .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .profile-right-column .stat-icon {
+        font-size: 1.6rem;
     }
     
     .auth-buttons-container {

@@ -2781,6 +2781,21 @@ function getRandomProduct() {
         
         console.log(`Använder ${filteredProducts.length} produkter efter filtrering`);
         
+        // Sätt totalQuestions baserat på tillgängliga filtrerade produkter
+        const countFilter = document.getElementById('countFilter');
+        if (countFilter) {
+            const selectedCount = countFilter.value;
+            if (selectedCount === 'alla') {
+                totalQuestions = filteredProducts.length; // Alla filtrerade produkter
+            } else {
+                totalQuestions = Math.min(parseInt(selectedCount), filteredProducts.length);
+            }
+        } else {
+            totalQuestions = Math.min(10, filteredProducts.length); // Fallback
+        }
+        
+        console.log(`Spel kommer ha ${totalQuestions} frågor (av ${filteredProducts.length} tillgängliga produkter)`);
+        
         gameProducts = [...filteredProducts]; // Skapa en kopia av den filtrerade listan
         
         // Blanda produkterna
@@ -2789,18 +2804,22 @@ function getRandomProduct() {
             [gameProducts[i], gameProducts[j]] = [gameProducts[j], gameProducts[i]];
         }
         
-        // Om användaren valt fler produkter än vad som finns, upprepa listan
-        while (gameProducts.length < totalQuestions) {
-            // Lägg till fler kopior av produkterna och blanda igen
-            const moreCopies = [...filteredProducts];
-            for (let i = moreCopies.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [moreCopies[i], moreCopies[j]] = [moreCopies[j], moreCopies[i]];
+        // ENDAST upprepa produkter om användaren specifikt valt fler än vad som finns
+        // OCH om de valt "alla" eller ett specifikt antal som är större än tillgängliga
+        if (totalQuestions > filteredProducts.length) {
+            console.log(`Användaren vill ha ${totalQuestions} frågor men bara ${filteredProducts.length} produkter finns - upprepning krävs`);
+            while (gameProducts.length < totalQuestions) {
+                // Lägg till fler kopior av produkterna och blanda igen
+                const moreCopies = [...filteredProducts];
+                for (let i = moreCopies.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [moreCopies[i], moreCopies[j]] = [moreCopies[j], moreCopies[i]];
+                }
+                gameProducts = gameProducts.concat(moreCopies);
             }
-            gameProducts = gameProducts.concat(moreCopies);
         }
         
-        // Begränsa till exakt antal frågor som användaren valt
+        // Begränsa till exakt antal frågor som ska spelas
         gameProducts = gameProducts.slice(0, totalQuestions);
         
         console.log('Spelprodukterlista skapad:', gameProducts.length, 'produkter för', totalQuestions, 'frågor');
@@ -4034,20 +4053,7 @@ function startGame() {
         window.soundManager.playGameStart();
     }
     
-    // Läs användarens val för antal produkter
-    const countFilter = document.getElementById('countFilter');
-    if (countFilter) {
-        const selectedCount = countFilter.value;
-        if (selectedCount === 'alla') {
-            totalQuestions = products.length; // Alla 21 produkter
-        } else {
-            totalQuestions = Math.min(parseInt(selectedCount), products.length);
-        }
-    } else {
-        totalQuestions = Math.min(10, products.length); // Fallback - max 10 eller alla tillgängliga
-    }
-    
-    console.log('Antal frågor för detta spel:', totalQuestions);
+    console.log('Startar spel...');
     
     // Hide menu sections and show game
     hideSection('filterSection');

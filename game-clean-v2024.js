@@ -4059,14 +4059,12 @@ function setupMenuButtons() {
     const timeModeBtn = document.getElementById('timeModeBtn');
     const reverseModeBtn = document.getElementById('reverseModeBtn');
     const practiceModeBtn = document.getElementById('practiceModeBtn');
-    const backToMenuFromGameModeBtn = document.getElementById('backToMenuFromGameMode');
     const backToMenuFromGameModeTopBtn = document.getElementById('backToMenuFromGameModeTop');
     
     if (classicModeBtn) addClickSound(classicModeBtn, () => showFilterSection('classic'));
     if (timeModeBtn) addClickSound(timeModeBtn, () => showFilterSection('time'));
     if (reverseModeBtn) addClickSound(reverseModeBtn, () => showFilterSection('reverse'));
     if (practiceModeBtn) addClickSound(practiceModeBtn, () => showFilterSection('practice'));
-    if (backToMenuFromGameModeBtn) addClickSound(backToMenuFromGameModeBtn, showMenu);
     if (backToMenuFromGameModeTopBtn) addClickSound(backToMenuFromGameModeTopBtn, showMenu);
     
     // Filter section buttons

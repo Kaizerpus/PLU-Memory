@@ -5176,6 +5176,105 @@ button:active, .btn:active {
     font-size: 18px;
 }
 
+/* Register Modal Styles */
+.register-modal-content {
+    max-width: 600px !important;
+    max-height: 85vh;
+}
+
+.register-intro {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 25px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.register-options {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.register-option {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.register-option h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+}
+
+.register-option p {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.4;
+}
+
+.register-option .provider-btn {
+    margin-top: 10px;
+    justify-content: flex-start;
+    padding: 15px 20px;
+}
+
+.register-footer {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.register-footer p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: #64b5f6;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+    margin: 0;
+}
+
+.link-btn:hover {
+    color: #90caf9;
+}
+
+/* Mobile responsiveness for register modal */
+@media (max-width: 768px) {
+    .register-modal-content {
+        max-width: 95% !important;
+        margin: 20px auto;
+    }
+    
+    .register-options {
+        gap: 20px;
+    }
+    
+    .register-option {
+        padding: 15px;
+    }
+    
+    .register-option .provider-btn {
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+    
+    .register-option .provider-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+}
+
 .google-provider:hover {
     background: linear-gradient(135deg, #4285f4 0%, #34a853 25%, #fbbc05 50%, #ea4335 75%);
     background-size: 300% 300%;

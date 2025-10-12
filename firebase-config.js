@@ -1098,7 +1098,7 @@ function setupAuthButtons() {
     const registerBtn = document.getElementById('registerButton');
     if (registerBtn) {
         registerBtn.addEventListener('click', () => {
-            openEmailAuth('signup');
+            openRegisterModal();
         });
     }
     
@@ -1109,6 +1109,47 @@ function setupAuthButtons() {
             await window.firebaseManager.signOut();
         });
     }
+}
+
+// Register modal functions
+function openRegisterModal() {
+    const modal = document.getElementById('registerModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function closeRegisterModal() {
+    const modal = document.getElementById('registerModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Register functions called from register modal
+async function registerWithGoogle() {
+    closeRegisterModal();
+    await window.firebaseManager.signInWithGoogle();
+}
+
+async function registerWithApple() {
+    closeRegisterModal();
+    await window.firebaseManager.signInWithApple();
+}
+
+function openEmailRegistration() {
+    closeRegisterModal();
+    const modal = document.getElementById('emailAuthModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        showEmailTab('signup');
+        document.getElementById('signup-email')?.focus();
+    }
+}
+
+function switchToLogin() {
+    closeRegisterModal();
+    openAuthProviderModal();
 }
 
 // Provider selection modal functions
@@ -1312,8 +1353,11 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         const authModal = document.getElementById('authProviderModal');
         const emailModal = document.getElementById('emailAuthModal');
+        const registerModal = document.getElementById('registerModal');
         
-        if (authModal && !authModal.classList.contains('hidden')) {
+        if (registerModal && !registerModal.classList.contains('hidden')) {
+            closeRegisterModal();
+        } else if (authModal && !authModal.classList.contains('hidden')) {
             closeAuthModal();
         } else if (emailModal && !emailModal.classList.contains('hidden')) {
             closeEmailModal();
@@ -1325,6 +1369,13 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('click', (event) => {
     const authModal = document.getElementById('authProviderModal');
     const emailModal = document.getElementById('emailAuthModal');
+    const registerModal = document.getElementById('registerModal');
+    
+    if (registerModal && !registerModal.classList.contains('hidden')) {
+        if (event.target === registerModal || event.target.classList.contains('modal-overlay')) {
+            closeRegisterModal();
+        }
+    }
     
     if (authModal && !authModal.classList.contains('hidden')) {
         if (event.target === authModal || event.target.classList.contains('modal-overlay')) {

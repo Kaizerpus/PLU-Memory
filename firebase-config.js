@@ -1166,11 +1166,22 @@ function closeRegisterModal() {
 async function registerWithGoogle() {
     console.log('🔗 registerWithGoogle funktionen kallad');
     closeRegisterModal();
+    
+    // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt');
-        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        for (let i = 0; i < 50; i++) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (window.firebaseManager) break;
+        }
+    }
+    
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
         return;
     }
+    
     console.log('🔥 Anropar firebaseManager.signInWithGoogle...');
     await window.firebaseManager.signInWithGoogle();
 }
@@ -1178,11 +1189,22 @@ async function registerWithGoogle() {
 async function registerWithApple() {
     console.log('🔗 registerWithApple funktionen kallad');
     closeRegisterModal();
+    
+    // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt');
-        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        for (let i = 0; i < 50; i++) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (window.firebaseManager) break;
+        }
+    }
+    
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
         return;
     }
+    
     console.log('🔥 Anropar firebaseManager.signInWithApple...');
     await window.firebaseManager.signInWithApple();
 }
@@ -1225,11 +1247,23 @@ function closeAuthModal() {
 async function signInWithGoogle() {
     console.log('🔗 signInWithGoogle funktionen kallad');
     closeAuthModal();
+    
+    // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt');
-        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        // Wait up to 5 seconds for Firebase to initialize
+        for (let i = 0; i < 50; i++) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (window.firebaseManager) break;
+        }
+    }
+    
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
         return;
     }
+    
     console.log('🔥 Anropar firebaseManager.signInWithGoogle...');
     await window.firebaseManager.signInWithGoogle();
 }
@@ -1237,11 +1271,22 @@ async function signInWithGoogle() {
 async function signInWithApple() {
     console.log('🔗 signInWithApple funktionen kallad');
     closeAuthModal();
+    
+    // Wait for Firebase Manager if not available
     if (!window.firebaseManager) {
-        console.error('❌ Firebase Manager inte tillgängligt');
-        if (window.showToast) window.showToast('Systemfel - försök igen', 'error');
+        console.log('⏳ Firebase Manager inte tillgängligt än, väntar...');
+        for (let i = 0; i < 50; i++) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (window.firebaseManager) break;
+        }
+    }
+    
+    if (!window.firebaseManager) {
+        console.error('❌ Firebase Manager inte tillgängligt efter väntan');
+        if (window.showToast) window.showToast('Systemfel - Firebase inte laddat. Försök igen.', 'error');
         return;
     }
+    
     console.log('🔥 Anropar firebaseManager.signInWithApple...');
     await window.firebaseManager.signInWithApple();
 }

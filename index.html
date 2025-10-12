@@ -65,7 +65,61 @@
             <div id="name-error" class="error-message" role="alert" aria-live="polite" style="display: none;"></div>
         </section>
         
-        <section id="filterSection" aria-labelledby="game-settings-heading" role="region">
+        <section id="gameModeSection" class="hidden" aria-labelledby="game-mode-heading" role="region">
+            <h2 id="game-mode-heading" aria-level="2">🎮 Välj spelläge:</h2>
+            
+            <div class="gamemode-grid">
+                <button id="classicModeBtn" 
+                        class="gamemode-btn" 
+                        aria-describedby="classic-help"
+                        type="button"
+                        role="button">
+                    <span class="gamemode-icon">⚡</span>
+                    <span class="gamemode-title">Klassiskt</span>
+                    <span class="gamemode-description">Lär dig PLU-koder steg för steg</span>
+                </button>
+                <div id="classic-help" class="help-text" role="note">Traditionell träning med produktnamn och PLU-koder</div>
+                
+                <button id="timeModeBtn" 
+                        class="gamemode-btn" 
+                        aria-describedby="time-help"
+                        type="button"
+                        role="button">
+                    <span class="gamemode-icon">⏰</span>
+                    <span class="gamemode-title">Tidsutmaning</span>
+                    <span class="gamemode-description">Snabba svar under tidspress</span>
+                </button>
+                <div id="time-help" class="help-text" role="note">Svara snabbt innan tiden tar slut - perfekt för att testa reflexer</div>
+                
+                <button id="reverseModeBtn" 
+                        class="gamemode-btn" 
+                        aria-describedby="reverse-help"
+                        type="button"
+                        role="button">
+                    <span class="gamemode-icon">🔄</span>
+                    <span class="gamemode-title">Omvänd</span>
+                    <span class="gamemode-description">Gissa produkten från PLU-koden</span>
+                </button>
+                <div id="reverse-help" class="help-text" role="note">Utmaning - få PLU-koden och gissa vilken produkt det är</div>
+                
+                <button id="practiceModeBtn" 
+                        class="gamemode-btn" 
+                        aria-describedby="practice-help"
+                        type="button"
+                        role="button">
+                    <span class="gamemode-icon">📚</span>
+                    <span class="gamemode-title">Övningsläge</span>
+                    <span class="gamemode-description">Träna utan poäng eller press</span>
+                </button>
+                <div id="practice-help" class="help-text" role="note">Avslappnad träning där du kan ta din tid utan att räkna poäng</div>
+            </div>
+            
+            <div class="gamemode-controls">
+                <button id="backToMenuFromGameMode" type="button" class="secondary-btn" role="button">Tillbaka till meny</button>
+            </div>
+        </section>
+        
+        <section id="filterSection" class="hidden" aria-labelledby="game-settings-heading" role="region">
             <h2 id="game-settings-heading" aria-level="2">🎯 Välj vad du vill träna på:</h2>
             
             <fieldset class="filter-group" aria-labelledby="category-label">
@@ -111,6 +165,11 @@
                 </select>
                 <div id="count-help" class="help-text" role="note">Välj hur många produkter du vill träna på</div>
             </fieldset>
+            
+            <div class="filter-controls">
+                <button id="backToGameModeFromFilter" type="button" class="secondary-btn" role="button">Tillbaka till spelläge</button>
+                <button id="startGameWithSettings" type="button" class="start-btn" role="button">🚀 Starta spelet</button>
+            </div>
         </section>
         
         <nav id="navigation" role="navigation" aria-label="Huvudmeny">
@@ -120,11 +179,11 @@
                 <!-- Huvudknappar -->
                 <div class="primary-buttons">
                     <button id="startBtn" 
-                            class="primary-btn" 
+                            class="start-btn" 
                             aria-describedby="start-help"
                             type="button"
-                            role="button">🚀 Starta spelet</button>
-                    <div id="start-help" class="help-text" role="note">Börja träna med valda inställningar</div>
+                            role="button">🎮 Spela</button>
+                    <div id="start-help" class="help-text" role="note">Välj spelläge och börja träna</div>
                     
                     <button id="leaderboardBtn" 
                             class="secondary-btn" 

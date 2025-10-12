@@ -935,6 +935,89 @@ button:disabled {
     font-style: italic;
 }
 
+/* Gamemode-sektion */
+#gameModeSection {
+    text-align: center;
+    margin: 25px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8f9ff, #ffffff);
+    border-radius: 12px;
+    border: 1px solid #e6e8ff;
+    box-shadow: 0 4px 16px rgba(40, 100, 255, 0.08);
+}
+
+#gameModeSection h2 {
+    color: #2864ff;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.gamemode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.gamemode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, #ffffff, #f8f9ff);
+    border: 2px solid #e6e8ff;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-height: 160px;
+    position: relative;
+    overflow: hidden;
+}
+
+.gamemode-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(40, 100, 255, 0.15);
+    border-color: #2864ff;
+    background: linear-gradient(135deg, #f8f9ff, #ffffff);
+}
+
+.gamemode-btn:active {
+    transform: translateY(-2px);
+}
+
+.gamemode-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.gamemode-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2864ff;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.gamemode-description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+    display: block;
+}
+
+.gamemode-controls {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e6e8ff;
+}
+
+.gamemode-controls button {
+    margin: 0 10px;
+}
+
 /* Filter-sektion */
 #filterSection {
     text-align: center;
@@ -989,6 +1072,17 @@ button:disabled {
     color: #6c757d;
     cursor: not-allowed;
     border-color: #dee2e6;
+}
+
+.filter-controls {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #ffe6e6;
+    text-align: center;
+}
+
+.filter-controls button {
+    margin: 0 10px;
 }
 
 /* Meny-knappar */
@@ -2621,9 +2715,34 @@ input:focus, select:focus {
     }
     
     #nameSection,
-    #filterSection {
+    #filterSection,
+    #gameModeSection {
         margin: 15px 0;
         padding: 15px;
+    }
+    
+    .gamemode-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .gamemode-btn {
+        min-height: 140px;
+        padding: 20px 15px;
+    }
+    
+    .gamemode-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    
+    .gamemode-title {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+    
+    .gamemode-description {
+        font-size: 13px;
     }
     
     #playerName {
@@ -3265,6 +3384,7 @@ body.offline .game-container {
 
 [data-theme="dark"] #nameSection,
 [data-theme="dark"] #filterSection,
+[data-theme="dark"] #gameModeSection,
 [data-theme="dark"] #game-area,
 [data-theme="dark"] #leaderboard,
 [data-theme="dark"] #achievements,
@@ -3272,6 +3392,7 @@ body.offline .game-container {
 [data-theme="dark"] #accessibility,
 .dark-theme #nameSection,
 .dark-theme #filterSection,
+.dark-theme #gameModeSection,
 .dark-theme #game-area,
 .dark-theme #leaderboard,
 .dark-theme #achievements,
@@ -3442,6 +3563,29 @@ body.offline .game-container {
 [data-theme="dark"] .button-group button:hover,
 .dark-theme .button-group button:hover {
     background: #505050 !important;
+}
+
+[data-theme="dark"] .gamemode-btn,
+.dark-theme .gamemode-btn {
+    background: linear-gradient(135deg, #404040, #2d2d2d) !important;
+    border-color: #505050 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .gamemode-btn:hover,
+.dark-theme .gamemode-btn:hover {
+    background: linear-gradient(135deg, #505050, #404040) !important;
+    border-color: #667eea !important;
+}
+
+[data-theme="dark"] .gamemode-title,
+.dark-theme .gamemode-title {
+    color: #667eea !important;
+}
+
+[data-theme="dark"] .gamemode-description,
+.dark-theme .gamemode-description {
+    color: #cccccc !important;
 }
 
 [data-theme="dark"] .primary-btn,

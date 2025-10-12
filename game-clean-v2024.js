@@ -3456,12 +3456,51 @@ function showMenu() {
     console.log('Visar huvudmeny');
     hideAllSections();
     showSection('nameSection');
-    showSection('filterSection'); 
     showSection('menuButtons');
+    hideSection('gameModeSection');
+    hideSection('filterSection');
+}
+
+function showGameModeSelection() {
+    console.log('Visar spellägesval');
+    
+    // Validate player name first
+    const playerNameInput = document.getElementById('playerName');
+    if (playerNameInput && !playerNameInput.value.trim()) {
+        alert('Ange ditt namn först!');
+        playerNameInput.focus();
+        return;
+    }
+    
+    hideSection('menuButtons');
+    showSection('gameModeSection');
+    hideSection('filterSection');
+}
+
+function showFilterSection(gameMode) {
+    console.log(`Visar filtreringsalternativ för spelläge: ${gameMode}`);
+    
+    // Store selected game mode for later use
+    window.selectedGameMode = gameMode;
+    
+    hideSection('gameModeSection');
+    showSection('filterSection');
+    
+    // Update filter section title based on game mode
+    const filterTitle = document.getElementById('game-settings-heading');
+    if (filterTitle) {
+        const gameModeNames = {
+            'classic': 'Klassiskt läge',
+            'time': 'Tidsutmaning',
+            'reverse': 'Omvänt läge', 
+            'practice': 'Övningsläge'
+        };
+        filterTitle.textContent = `🎯 ${gameModeNames[gameMode] || 'Spel'} - Välj vad du vill träna på:`;
+    }
 }
 
 function hideAllSections() {
-    const sections = ['game-area', 'gameButtons', 'leaderboard', 'achievements', 'profile', 'accessibility'];
+    const sections = ['game-area', 'gameButtons', 'leaderboard', 'achievements', 'profile', 'accessibility', 'gameModeSection', 'filterSection'];
     sections.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -4027,11 +4066,31 @@ function setupMenuButtons() {
         }
     }
     
-    if (startBtn) addClickSound(startBtn, startGame);
+    if (startBtn) addClickSound(startBtn, showGameModeSelection);
     if (leaderboardBtn) addClickSound(leaderboardBtn, showLeaderboard);
     if (achievementsBtn) addClickSound(achievementsBtn, showAchievements);
     if (profileBtn) addClickSound(profileBtn, showProfile);
     if (accessibilityBtn) addClickSound(accessibilityBtn, showAccessibility);
+    
+    // Gamemode buttons
+    const classicModeBtn = document.getElementById('classicModeBtn');
+    const timeModeBtn = document.getElementById('timeModeBtn');
+    const reverseModeBtn = document.getElementById('reverseModeBtn');
+    const practiceModeBtn = document.getElementById('practiceModeBtn');
+    const backToMenuFromGameModeBtn = document.getElementById('backToMenuFromGameMode');
+    
+    if (classicModeBtn) addClickSound(classicModeBtn, () => showFilterSection('classic'));
+    if (timeModeBtn) addClickSound(timeModeBtn, () => showFilterSection('time'));
+    if (reverseModeBtn) addClickSound(reverseModeBtn, () => showFilterSection('reverse'));
+    if (practiceModeBtn) addClickSound(practiceModeBtn, () => showFilterSection('practice'));
+    if (backToMenuFromGameModeBtn) addClickSound(backToMenuFromGameModeBtn, showMenu);
+    
+    // Filter section buttons
+    const backToGameModeFromFilterBtn = document.getElementById('backToGameModeFromFilter');
+    const startGameWithSettingsBtn = document.getElementById('startGameWithSettings');
+    
+    if (backToGameModeFromFilterBtn) addClickSound(backToGameModeFromFilterBtn, showGameModeSelection);
+    if (startGameWithSettingsBtn) addClickSound(startGameWithSettingsBtn, startGame);
     
     // Note: Dark mode toggle is now handled by ThemeManager
     

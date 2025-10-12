@@ -171,6 +171,15 @@
                         aria-haspopup="dialog"
                         role="button">⚙️ Tillgänglighet</button>
                 <div id="accessibility-help" class="help-text" role="note">Öppna tillgänglighetsinställningar</div>
+                
+                <button id="adminBtn" 
+                        class="admin-btn admin-only" 
+                        aria-describedby="admin-help"
+                        type="button"
+                        aria-haspopup="dialog"
+                        role="button"
+                        style="display: none;">👑 Admin Panel</button>
+                <div id="admin-help" class="help-text" role="note">Hantera användare och roller (endast admin)</div>
             </div>
         </nav>
         
@@ -314,6 +323,42 @@
                         <div id="reduced-motion-help" class="help-text">Minska animationer och övergångar</div>
                     </div>
                 </fieldset>
+            </div>
+        </section>
+        
+        <section id="adminPanel" class="hidden admin-only" role="dialog" aria-labelledby="admin-title" aria-modal="false">
+            <h2 id="admin-title" aria-level="2">👑 Admin Panel</h2>
+            <div id="adminButtons" role="group" aria-labelledby="admin-controls-heading">
+                <h3 id="admin-controls-heading" class="sr-only" aria-level="3">Admin kontroller</h3>
+                <button id="backToMenuFromAdmin" type="button" role="button">Tillbaka till meny</button>
+                <button id="refreshUserList" type="button" role="button">🔄 Uppdatera lista</button>
+            </div>
+            
+            <div id="adminContent" role="tabpanel" aria-labelledby="admin-title">
+                <h3>👥 Användarhantering</h3>
+                <div id="userManagement">
+                    <div id="userList" class="user-list">
+                        <p>Laddar användare...</p>
+                    </div>
+                </div>
+                
+                <div class="admin-stats moderator-only">
+                    <h3>📊 Statistik</h3>
+                    <div id="adminStats">
+                        <div class="stat-item">
+                            <span class="stat-label">Totalt antal användare:</span>
+                            <span id="totalUsers">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Moderatorer:</span>
+                            <span id="totalModerators">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Administratörer:</span>
+                            <span id="totalAdmins">-</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>

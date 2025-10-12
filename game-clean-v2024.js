@@ -4938,4 +4938,220 @@ showProfile = async function() {
 };
 
 console.log('🎮 Ultra Clean Script laddad klart - v2024 + Mobile Enhanced + Firebase');
+
+// 👑 ADMIN PANEL FUNKTIONALITET
+class AdminPanel {
+    constructor() {
+        this.isOpen = false;
+        this.users = [];
+        this.init();
+    }
+
+    init() {
+        // Lägg till event listeners för admin-panel
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminBtn = document.getElementById('adminBtn');
+            const backBtn = document.getElementById('backToMenuFromAdmin');
+            const refreshBtn = document.getElementById('refreshUserList');
+
+            if (adminBtn) {
+                adminBtn.addEventListener('click', () => this.showAdminPanel());
+            }
+            
+            if (backBtn) {
+                backBtn.addEventListener('click', () => this.hideAdminPanel());
+            }
+            
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => this.loadUsers());
+            }
+        });
+    }
+
+    async showAdminPanel() {
+        if (!window.firebaseManager || !window.firebaseManager.isAdmin) {
+            showToast('Endast administratörer kan öppna admin-panelen', 'error');
+            return;
+        }
+
+        hideAllSections();
+        document.getElementById('adminPanel').classList.remove('hidden');
+        this.isOpen = true;
+        
+        await this.loadUsers();
+        
+        // Första användaren blir automatiskt admin
+        await this.checkFirstUser();
+    }
+
+    hideAdminPanel() {
+        document.getElementById('adminPanel').classList.add('hidden');
+        showMenuSection();
+        this.isOpen = false;
+    }
+
+    async checkFirstUser() {
+        if (!window.firebaseManager || !window.firebaseManager.isInitialized) return;
+
+        try {
+            // Kontrollera om det finns några admins
+            const rolesSnapshot = await window.firebase.firestore()
+                .collection('userRoles')
+                .where('role', '==', 'admin')
+                .get();
+
+            if (rolesSnapshot.empty && window.firebase.auth().currentUser) {
+                // Ingen admin finns - gör nuvarande användare till admin
+                const currentUser = window.firebase.auth().currentUser;
+                await window.firebaseManager.setUserRole(currentUser.uid, 'admin');
+                
+                // Uppdatera lokala variabler
+                window.firebaseManager.userRole = 'admin';
+                window.firebaseManager.isAdmin = true;
+                window.firebaseManager.isModerator = true;
+                window.firebaseManager.updateRoleUI();
+                
+                showToast(`Grattis! Du är nu administratör för PLU Memory! 👑`, 'success');
+                console.log('👑 Första användaren blev admin');
+            }
+        } catch (error) {
+            console.error('❌ Kunde inte kontrollera första användare:', error);
+        }
+    }
+
+    async loadUsers() {
+        if (!window.firebaseManager || !window.firebaseManager.isModerator) return;
+
+        const userList = document.getElementById('userList');
+        if (!userList) return;
+
+        userList.innerHTML = '<p>Laddar användare...</p>';
+
+        try {
+            this.users = await window.firebaseManager.getAllUsers();
+            this.renderUserList();
+            this.updateStats();
+        } catch (error) {
+            console.error('❌ Kunde inte ladda användare:', error);
+            userList.innerHTML = '<p>Fel vid laddning av användare</p>';
+        }
+    }
+
+    renderUserList() {
+        const userList = document.getElementById('userList');
+        if (!userList || !this.users.length) {
+            userList.innerHTML = '<p>Inga användare hittades</p>';
+            return;
+        }
+
+        userList.innerHTML = this.users.map(user => `
+            <div class="user-item" data-user-id="${user.uid}">
+                <div class="user-info">
+                    <img src="${user.photoURL || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">👤</text></svg>'}" 
+                         alt="Avatar" class="user-avatar">
+                    <div class="user-details">
+                        <div class="user-name">
+                            ${user.displayName}
+                            ${user.isCurrentUser ? ' (Du)' : ''}
+                        </div>
+                        <div class="user-email">${user.email}</div>
+                    </div>
+                    <span class="role-badge ${user.role}">
+                        ${user.role === 'admin' ? '👑' : user.role === 'moderator' ? '🛡️' : '👤'} 
+                        ${user.role.toUpperCase()}
+                    </span>
+                </div>
+                <div class="user-actions">
+                    ${this.getUserActionButtons(user)}
+                </div>
+            </div>
+        `).join('');
+
+        // Lägg till event listeners för knappar
+        this.attachUserActionListeners();
+    }
+
+    getUserActionButtons(user) {
+        if (!window.firebaseManager.isAdmin || user.isCurrentUser) {
+            return '<span style="color: #999;">-</span>';
+        }
+
+        const buttons = [];
+        
+        if (user.role === 'user') {
+            buttons.push(`
+                <button class="role-btn promote" data-action="promote" data-user-id="${user.uid}" data-user-name="${user.displayName}">
+                    🛡️ Gör till moderator
+                </button>
+            `);
+        }
+        
+        if (user.role === 'moderator') {
+            buttons.push(`
+                <button class="role-btn demote" data-action="demote" data-user-id="${user.uid}" data-user-name="${user.displayName}">
+                    👤 Ta bort moderator
+                </button>
+            `);
+        }
+        
+        return buttons.join('');
+    }
+
+    attachUserActionListeners() {
+        const buttons = document.querySelectorAll('.role-btn[data-action]');
+        buttons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const action = e.target.dataset.action;
+                const userId = e.target.dataset.userId;
+                const userName = e.target.dataset.userName;
+                
+                if (action === 'promote') {
+                    await this.promoteUser(userId, userName);
+                } else if (action === 'demote') {
+                    await this.demoteUser(userId, userName);
+                }
+            });
+        });
+    }
+
+    async promoteUser(userId, userName) {
+        if (!confirm(`Vill du verkligen göra ${userName} till moderator?`)) return;
+        
+        const success = await window.firebaseManager.promoteToModerator(userId, userName);
+        if (success) {
+            await this.loadUsers(); // Uppdatera listan
+        }
+    }
+
+    async demoteUser(userId, userName) {
+        if (!confirm(`Vill du verkligen ta bort moderator-rollen från ${userName}?`)) return;
+        
+        const success = await window.firebaseManager.demoteUser(userId, userName);
+        if (success) {
+            await this.loadUsers(); // Uppdatera listan
+        }
+    }
+
+    updateStats() {
+        const stats = {
+            total: this.users.length,
+            admins: this.users.filter(u => u.role === 'admin').length,
+            moderators: this.users.filter(u => u.role === 'moderator').length,
+            users: this.users.filter(u => u.role === 'user').length
+        };
+
+        const totalUsers = document.getElementById('totalUsers');
+        const totalAdmins = document.getElementById('totalAdmins');
+        const totalModerators = document.getElementById('totalModerators');
+
+        if (totalUsers) totalUsers.textContent = stats.total;
+        if (totalAdmins) totalAdmins.textContent = stats.admins;
+        if (totalModerators) totalModerators.textContent = stats.moderators;
+    }
+}
+
+// Initiera admin-panel
+window.adminPanel = new AdminPanel();
+
+console.log('👑 Admin Panel initierat - rollsystem aktivt');
 console.log('🔥 Firebase achievements och leaderboard aktiverat');

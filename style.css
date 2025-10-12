@@ -5356,3 +5356,182 @@ button:not(.special-button)::after {
     border-color: #ffff00 !important;
     background: rgba(255, 255, 0, 0.1) !important;
 }
+
+/* Rollsystem styling */
+.role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-left: 8px;
+    text-transform: uppercase;
+}
+
+.role-badge.admin {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #333;
+    box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.role-badge.moderator {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
+    box-shadow: 0 2px 4px rgba(108, 92, 231, 0.3);
+}
+
+.role-badge.user {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+    box-shadow: 0 2px 4px rgba(116, 185, 255, 0.3);
+}
+
+/* Admin Panel */
+#adminPanel {
+    background: var(--bg-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.user-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    background: var(--card-bg);
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.user-item:hover {
+    background: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 12px;
+    border: 2px solid var(--border-color);
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 2px;
+}
+
+.user-email {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.role-btn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.role-btn.promote {
+    background: #28a745;
+    color: white;
+}
+
+.role-btn.promote:hover {
+    background: #218838;
+}
+
+.role-btn.demote {
+    background: #ffc107;
+    color: #333;
+}
+
+.role-btn.demote:hover {
+    background: #e0a800;
+}
+
+.role-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.admin-stats {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.admin-btn {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #333;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+}
+
+.admin-btn:hover {
+    background: linear-gradient(135deg, #ffed4e, #ffd700);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 215, 0, 0.4);
+}
+
+/* Moderator-specific styling */
+.moderator-only {
+    border-left: 4px solid #6c5ce7;
+}
+
+.admin-only {
+    border-left: 4px solid #ffd700;
+}

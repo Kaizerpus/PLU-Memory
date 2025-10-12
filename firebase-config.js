@@ -28,6 +28,9 @@ class FirebaseManager {
         this.maxRetries = 3;
         this.persistenceEnabled = false;
         this.authListenerSet = false;
+        this.userRole = 'user'; // 'user', 'moderator', 'admin'
+        this.isAdmin = false;
+        this.isModerator = false;
         
         // Lyssna på nätverksstatus
         window.addEventListener('online', () => {
@@ -111,9 +114,14 @@ class FirebaseManager {
             // Lyssna på autentiseringsförändringar (bara en gång)
             if (!this.authListenerSet) {
                 console.log('👂 Sätter upp auth state listener...');
-                auth.onAuthStateChanged(user => {
+                auth.onAuthStateChanged(async user => {
                     currentUser = user;
                     console.log('👤 Auth state ändrad:', user ? `Inloggad som ${user.displayName}` : 'Ej inloggad');
+                    
+                    if (user) {
+                        await this.checkUserRole(user);
+                    }
+                    
                     this.handleAuthStateChange(user);
                 });
                 this.authListenerSet = true;
@@ -174,6 +182,7 @@ class FirebaseManager {
         if (user) {
             console.log('👤 Användare inloggad:', user.displayName);
             this.syncUserData();
+            this.checkUserRole(user);
             this.updateUI(true);
         } else {
             console.log('👤 Användare utloggad');
@@ -535,6 +544,204 @@ class FirebaseManager {
         } catch (error) {
             console.error('❌ Kunde inte ladda leaderboard:', error);
             return [];
+        }
+    }
+
+    // 🔐 ROLLSYSTEM - Admin & Moderator funktioner
+    async checkUserRole(user) {
+        if (!this.isInitialized || !user) return;
+
+        try {
+            // Kontrollera om användaren har en roll i databasen
+            const roleDoc = await db.collection('userRoles').doc(user.uid).get();
+            
+            if (roleDoc.exists) {
+                const roleData = roleDoc.data();
+                this.userRole = roleData.role || 'user';
+                this.isAdmin = this.userRole === 'admin';
+                this.isModerator = this.userRole === 'moderator' || this.isAdmin;
+                
+                console.log('👑 Användarroll laddad:', {
+                    role: this.userRole,
+                    isAdmin: this.isAdmin,
+                    isModerator: this.isModerator
+                });
+            } else {
+                // Första gången för denna användare - ge user-roll
+                await this.setUserRole(user.uid, 'user');
+                this.userRole = 'user';
+                this.isAdmin = false;
+                this.isModerator = false;
+                
+                console.log('👤 Ny användare - satt som user');
+            }
+            
+            // Uppdatera UI baserat på roll
+            this.updateRoleUI();
+            
+        } catch (error) {
+            console.error('❌ Kunde inte kontrollera användarroll:', error);
+            // Fallback till user
+            this.userRole = 'user';
+            this.isAdmin = false;
+            this.isModerator = false;
+        }
+    }
+
+    async setUserRole(userId, newRole) {
+        if (!this.isInitialized) return false;
+        
+        // Första användaren blir automatiskt admin, annars kräv admin-rättigheter
+        const isFirstUser = !currentUser && newRole === 'user';
+        if (!isFirstUser && !this.isAdmin && newRole !== 'user') {
+            console.error('❌ Endast admin kan sätta moderator/admin roller');
+            if (window.showToast) {
+                window.showToast('Endast admin kan sätta roller', 'error');
+            }
+            return false;
+        }
+
+        try {
+            const roleData = {
+                role: newRole,
+                setBy: currentUser?.uid || 'system',
+                setByName: currentUser?.displayName || 'System',
+                setAt: firebase.firestore.FieldValue.serverTimestamp(),
+                userId: userId
+            };
+
+            await db.collection('userRoles').doc(userId).set(roleData, { merge: true });
+            
+            // Logga rolländringen (om inte första användaren)
+            if (currentUser) {
+                await db.collection('roleChanges').add({
+                    targetUserId: userId,
+                    newRole: newRole,
+                    changedBy: currentUser.uid,
+                    changedByName: currentUser.displayName,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            console.log(`✅ Användarroll uppdaterad: ${userId} → ${newRole}`);
+            
+            if (window.showToast) {
+                window.showToast(`Användarroll uppdaterad till ${newRole}`, 'success');
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Kunde inte sätta användarroll:', error);
+            if (window.showToast) {
+                window.showToast('Kunde inte uppdatera roll', 'error');
+            }
+            return false;
+        }
+    }
+
+    async getAllUsers() {
+        if (!this.isInitialized || !this.isModerator) return [];
+
+        try {
+            const usersSnapshot = await db.collection('users').get();
+            const rolesSnapshot = await db.collection('userRoles').get();
+            
+            const users = {};
+            const roles = {};
+            
+            // Samla användardata
+            usersSnapshot.docs.forEach(doc => {
+                const data = doc.data();
+                users[doc.id] = {
+                    uid: doc.id,
+                    displayName: data.displayName,
+                    email: data.email,
+                    lastActive: data.lastUpdated,
+                    gameStats: data.gameData
+                };
+            });
+            
+            // Samla rolldata
+            rolesSnapshot.docs.forEach(doc => {
+                roles[doc.id] = doc.data();
+            });
+            
+            // Kombinera data
+            const allUsers = Object.values(users).map(user => ({
+                ...user,
+                role: roles[user.uid]?.role || 'user',
+                isCurrentUser: user.uid === currentUser.uid
+            }));
+            
+            return allUsers.sort((a, b) => {
+                // Sortera: admin först, sedan moderator, sedan user
+                const roleOrder = { admin: 3, moderator: 2, user: 1 };
+                return roleOrder[b.role] - roleOrder[a.role];
+            });
+            
+        } catch (error) {
+            console.error('❌ Kunde inte hämta användarlista:', error);
+            return [];
+        }
+    }
+
+    async promoteToModerator(userId, userName) {
+        if (!this.isAdmin) {
+            if (window.showToast) {
+                window.showToast('Endast admin kan sätta moderatorer', 'error');
+            }
+            return false;
+        }
+        
+        const success = await this.setUserRole(userId, 'moderator');
+        if (success && window.showToast) {
+            window.showToast(`${userName} är nu moderator! 👑`, 'success');
+        }
+        return success;
+    }
+
+    async demoteUser(userId, userName) {
+        if (!this.isAdmin) {
+            if (window.showToast) {
+                window.showToast('Endast admin kan ta bort roller', 'error');
+            }
+            return false;
+        }
+        
+        const success = await this.setUserRole(userId, 'user');
+        if (success && window.showToast) {
+            window.showToast(`${userName} är nu vanlig användare`, 'info');
+        }
+        return success;
+    }
+
+    updateRoleUI() {
+        // Uppdatera UI baserat på användarens roll
+        const adminElements = document.querySelectorAll('.admin-only');
+        const moderatorElements = document.querySelectorAll('.moderator-only');
+        
+        adminElements.forEach(el => {
+            el.style.display = this.isAdmin ? 'block' : 'none';
+        });
+        
+        moderatorElements.forEach(el => {
+            el.style.display = this.isModerator ? 'block' : 'none';
+        });
+        
+        // Lägg till rollbadge i användarinfo
+        const userInfo = document.getElementById('userInfo');
+        if (userInfo && currentUser) {
+            const roleEmoji = this.isAdmin ? '👑' : this.isModerator ? '🛡️' : '👤';
+            const roleText = this.isAdmin ? 'Admin' : this.isModerator ? 'Moderator' : 'Användare';
+            
+            userInfo.innerHTML = `
+                <div class="user-profile">
+                    <img src="${currentUser.photoURL}" alt="Profil" class="profile-img">
+                    <span>Inloggad som ${currentUser.displayName}</span>
+                    <span class="role-badge ${this.userRole}">${roleEmoji} ${roleText}</span>
+                </div>
+            `;
         }
     }
 }

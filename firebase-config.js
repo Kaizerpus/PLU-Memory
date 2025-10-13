@@ -16,6 +16,7 @@ const firebaseConfig = {
 let firebase = null;
 let db = null;
 let auth = null;
+let storage = null;
 let currentUser = null;
 
 // ðŸ”¥ Firebase Manager - Hanterar all Firebase-funktionalitet
@@ -94,6 +95,10 @@ class FirebaseManager {
             db = firebase.firestore();
             console.log('âœ… Firestore konfigurerad');
             
+
+            console.log('📦 Sätter upp Storage...');
+            storage = firebase.storage();
+            console.log('✅ Storage konfigurerad');
             
             console.log('ï¿½ðŸ” SÃ¤tter upp Authentication...');
             auth = firebase.auth();
@@ -184,6 +189,7 @@ class FirebaseManager {
         const scripts = [
             'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
             'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js',
+            'https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js',
             'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js'
         ];
 
@@ -1469,6 +1475,90 @@ window.updateProfileUserName = function() {
         console.log('âœ… userInfoMenu uppdaterat');
     } else if (userInfoMenu) {
         userInfoMenu.innerHTML = '<span>Inte inloggad - data sparas lokalt</span>';
+    }
+};
+
+// Bilduppladdningsfunktioner för FirebaseManager
+FirebaseManager.prototype.uploadProductImage = async function(file, productName) {
+    if (!this.isInitialized || !storage) {
+        console.log('🚫 Firebase eller Storage inte initialiserat');
+        return null;
+    }
+
+    if (!this.isModerator && !this.isAdmin) {
+        console.log('🚫 Behöver moderator- eller admin-rättigheter för att ladda upp bilder');
+        return null;
+    }
+
+    try {
+        // Validera filtyp
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            console.error('❌ Ogiltigt filformat. Endast JPEG, PNG och WebP tillåtna');
+            if (window.showToast) {
+                window.showToast('Ogiltigt filformat. Endast JPEG, PNG och WebP tillåtna', 'error');
+            }
+            return null;
+        }
+
+        // Validera filstorlek (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            console.error('❌ Filen är för stor. Max 5MB tillåtna');
+            if (window.showToast) {
+                window.showToast('Filen är för stor. Maximalt 5MB tillåtna', 'error');
+            }
+            return null;
+        }
+
+        // Skapa unikt filnamn
+        const timestamp = Date.now();
+        const safeProductName = productName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const fileExtension = file.name.split('.').pop();
+        const fileName = `product_images/${safeProductName}_${timestamp}.${fileExtension}`;
+
+        console.log('📤 Laddar upp bild:', fileName);
+
+        // Ladda upp till Firebase Storage
+        const storageRef = storage.ref().child(fileName);
+        const uploadTask = await storageRef.put(file);
+
+        // Hämta download URL
+        const downloadURL = await uploadTask.ref.getDownloadURL();
+        
+        console.log('✅ Bild uppladdad:', downloadURL);
+        return downloadURL;
+
+    } catch (error) {
+        console.error('❌ Kunde inte ladda upp bild:', error);
+        if (window.showToast) {
+            window.showToast('Fel vid bilduppladdning', 'error');
+        }
+        return null;
+    }
+};
+
+FirebaseManager.prototype.deleteProductImage = async function(imageUrl) {
+    if (!this.isInitialized || !storage) {
+        console.log('🚫 Firebase eller Storage inte initialiserat');
+        return false;
+    }
+
+    if (!this.isAdmin) {
+        console.log('🚫 Behöver admin-rättigheter för att ta bort bilder');
+        return false;
+    }
+
+    try {
+        // Extrahera filnamn från URL
+        const storageRef = storage.refFromURL(imageUrl);
+        await storageRef.delete();
+        console.log('🗑️ Bild borttagen från Storage');
+        return true;
+
+    } catch (error) {
+        console.error('❌ Kunde inte ta bort bild:', error);
+        return false;
     }
 };
 

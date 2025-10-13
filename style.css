@@ -288,6 +288,26 @@ input:disabled {
     margin: 8px 0;
 }
 
+/* Bilduppladdning för produkter */
+.image-upload-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.image-upload-group input[type="text"] {
+    flex: 1;
+}
+
+.image-upload-group .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.current-image-preview {
+    margin-top: 8px;
+}
+
 /* Enhanced Feedback Styling */
 .feedback {
     padding: 20px;

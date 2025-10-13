@@ -267,6 +267,14 @@ input[type="number"] {
     letter-spacing: 1px;
 }
 
+/* Inaktiverat input-fält */
+input:disabled {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
 /* Shake animation för ogiltiga inmatningar */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
@@ -843,6 +851,23 @@ button {
     /* Improved contrast colors */
     background: #dc3545;
     color: #ffffff;
+}
+
+/* Inaktiverad knapp-stil */
+button:disabled,
+button.disabled {
+    background: #6c757d !important;
+    color: #ffffff !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+button:disabled:hover,
+button.disabled:hover {
+    background: #6c757d !important;
+    transform: none !important;
 }
 
 /* Specific button color variations with better contrast */

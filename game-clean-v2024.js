@@ -3093,15 +3093,21 @@ function startNewQuestion() {
     
     if (pluInput) {
         pluInput.value = '';
+        pluInput.disabled = false; // Återaktivera input-fältet
         pluInput.focus();
     }
-    
+
     if (feedback) {
         feedback.textContent = '';
         feedback.className = '';
     }
     
-    // Announce new question to screen reader
+    // Återaktivera submit-knappen för ny fråga
+    if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Skicka svar';
+        submitButton.classList.remove('disabled');
+    }    // Announce new question to screen reader
     if (accessibilityManager && currentProduct) {
         const questionText = `Fråga ${currentQuestionIndex + 1} av ${totalQuestions}. Vad är PLU-koden för ${currentProduct.name}?`;
         setTimeout(() => {
@@ -3125,10 +3131,23 @@ function startNewQuestion() {
 function checkAnswer() {
     const pluInput = document.getElementById('plu-input');
     const feedback = document.getElementById('feedback');
+    const submitButton = document.getElementById('submit-answer');
     
     if (!pluInput || !currentProduct) {
         console.log('Missing input element or current product');
         return;
+    }
+    
+    // Inaktivera submit-knappen direkt för att förhindra dubbla klick
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Väntar...';
+        submitButton.classList.add('disabled');
+    }
+    
+    // Inaktivera input-fältet också
+    if (pluInput) {
+        pluInput.disabled = true;
     }
     
     const userAnswer = pluInput.value.trim();

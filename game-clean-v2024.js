@@ -2928,12 +2928,15 @@ function startNewQuestion() {
                 <div class="input-container">
                     <label for="plu-input" class="sr-only">Ange PLU-kod</label>
                     <input 
-                        type="text" 
+                        type="number" 
+                        inputmode="numeric"
                         id="plu-input" 
                         placeholder="Ange PLU-kod (1-6 siffror)"
                         maxlength="6"
                         pattern="[0-9]{1,6}"
                         aria-describedby="feedback"
+                        min="1"
+                        max="999999"
                     >
                     <button id="submit-answer" type="button">Skicka svar</button>
                 </div>
@@ -2957,6 +2960,33 @@ function startNewQuestion() {
                     if (e.key === 'Enter') {
                         checkAnswer();
                     }
+                });
+                
+                // Säkerställ att endast siffror accepteras
+                pluInput.addEventListener('input', function(e) {
+                    // Ta bort icke-numeriska tecken
+                    let value = e.target.value.replace(/[^0-9]/g, '');
+                    // Begränsa till 6 siffror
+                    if (value.length > 6) {
+                        value = value.substring(0, 6);
+                    }
+                    e.target.value = value;
+                });
+                
+                // Förhindra vissa tangenter som kan orsaka problem
+                pluInput.addEventListener('keydown', function(e) {
+                    // Förhindra minus, plus, e, E, punkt, komma
+                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E' || e.key === '.' || e.key === ',') {
+                        e.preventDefault();
+                    }
+                });
+                
+                pluInput.addEventListener('paste', function(e) {
+                    // Förhindra inklistring av icke-numeriska tecken
+                    e.preventDefault();
+                    let paste = (e.clipboardData || window.clipboardData).getData('text');
+                    let numericOnly = paste.replace(/[^0-9]/g, '').substring(0, 6);
+                    e.target.value = numericOnly;
                 });
                 
                 // Enhance accessibility for input
@@ -4275,7 +4305,7 @@ function showProductDialog(product, index, title) {
                     
                     <div class="form-group">
                         <label for="productPlu">PLU-kod:</label>
-                        <input type="text" id="productPlu" name="plu" value="${product?.plu || ''}" required pattern="[0-9]{1,6}" maxlength="6" placeholder="1-6 siffror" title="PLU-koden kan vara 1-6 siffror">
+                        <input type="number" inputmode="numeric" id="productPlu" name="plu" value="${product?.plu || ''}" required pattern="[0-9]{1,6}" maxlength="6" placeholder="1-6 siffror" title="PLU-koden kan vara 1-6 siffror" min="1" max="999999">
                         <small style="color: #666; font-size: 0.9em;">PLU-koden kan vara 1-6 siffror</small>
                     </div>
                     
@@ -4381,6 +4411,36 @@ function showProductDialog(product, index, title) {
     if (addCategoryBtn) {
         addCategoryBtn.addEventListener('click', () => {
             showAddCategoryDialog();
+        });
+    }
+    
+    // PLU-input validering för produktdialog
+    const productPluInput = document.getElementById('productPlu');
+    if (productPluInput) {
+        productPluInput.addEventListener('input', function(e) {
+            // Ta bort icke-numeriska tecken
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            // Begränsa till 6 siffror
+            if (value.length > 6) {
+                value = value.substring(0, 6);
+            }
+            e.target.value = value;
+        });
+        
+        // Förhindra vissa tangenter som kan orsaka problem
+        productPluInput.addEventListener('keydown', function(e) {
+            // Förhindra minus, plus, e, E, punkt, komma
+            if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E' || e.key === '.' || e.key === ',') {
+                e.preventDefault();
+            }
+        });
+        
+        productPluInput.addEventListener('paste', function(e) {
+            // Förhindra inklistring av icke-numeriska tecken
+            e.preventDefault();
+            let paste = (e.clipboardData || window.clipboardData).getData('text');
+            let numericOnly = paste.replace(/[^0-9]/g, '').substring(0, 6);
+            e.target.value = numericOnly;
         });
     }
     

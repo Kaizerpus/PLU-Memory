@@ -246,6 +246,27 @@ input[type="text"], input[type="number"], select {
     appearance: none;
 }
 
+/* Dölj spinner-knappar för number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+    appearance: textfield; /* Standard */
+}
+
+/* PLU-input specialstyling */
+#plu-input, #productPlu {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
 /* Mobile-optimized spacing */
 .mobile-spacing {
     padding: 16px;

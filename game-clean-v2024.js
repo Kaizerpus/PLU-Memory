@@ -702,8 +702,8 @@ Spelkontroller:
         // Live validation feedback
         inputElement.addEventListener('input', (e) => {
             const value = e.target.value;
-            if (value.length === 4 && /^\d{4}$/.test(value)) {
-                this.announceToScreenReader('Fyrsiffrig kod ifylld');
+            if (value.length >= 1 && value.length <= 6 && /^\d{1,6}$/.test(value)) {
+                this.announceToScreenReader(`${value.length}-siffrig kod ifylld`);
             }
         });
     }
@@ -2042,7 +2042,14 @@ const defaultProducts = [
     { name: "Ostfralla", plu: "5001", image: "images/ostfralla.jpg", category: "söndagsbröd", difficulty: "medel" },
     { name: "Balder", plu: "5002", image: "images/balder.jpg", category: "söndagsbröd", difficulty: "ovanlig" },
     { name: "Tor", plu: "5003", image: "images/tor.jpg", category: "söndagsbröd", difficulty: "ovanlig" },
-    { name: "Kanelbulle", plu: "5004", image: "images/kanelbulle.jpg", category: "söndagsbröd", difficulty: "vanlig" }
+    { name: "Kanelbulle", plu: "5004", image: "images/kanelbulle.jpg", category: "söndagsbröd", difficulty: "vanlig" },
+    
+    // Test-produkter med olika PLU-längder
+    { name: "Test 1-siffra", plu: "1", image: "images/Placeholder.png", category: "test", difficulty: "vanlig" },
+    { name: "Test 2-siffror", plu: "12", image: "images/Placeholder.png", category: "test", difficulty: "vanlig" },
+    { name: "Test 3-siffror", plu: "123", image: "images/Placeholder.png", category: "test", difficulty: "vanlig" },
+    { name: "Test 5-siffror", plu: "12345", image: "images/Placeholder.png", category: "test", difficulty: "vanlig" },
+    { name: "Test 6-siffror", plu: "123456", image: "images/Placeholder.png", category: "test", difficulty: "vanlig" }
 ];
 
 // Global produktlista - kommer att laddas från Firestore eller fallback till defaultProducts
@@ -2923,9 +2930,9 @@ function startNewQuestion() {
                     <input 
                         type="text" 
                         id="plu-input" 
-                        placeholder="Ange PLU-kod (4 siffror)"
-                        maxlength="4"
-                        pattern="[0-9]{4}"
+                        placeholder="Ange PLU-kod (1-6 siffror)"
+                        maxlength="6"
+                        pattern="[0-9]{1,6}"
                         aria-describedby="feedback"
                     >
                     <button id="submit-answer" type="button">Skicka svar</button>
@@ -4268,7 +4275,8 @@ function showProductDialog(product, index, title) {
                     
                     <div class="form-group">
                         <label for="productPlu">PLU-kod:</label>
-                        <input type="text" id="productPlu" name="plu" value="${product?.plu || ''}" required pattern="[0-9]{4}">
+                        <input type="text" id="productPlu" name="plu" value="${product?.plu || ''}" required pattern="[0-9]{1,6}" maxlength="6" placeholder="1-6 siffror" title="PLU-koden kan vara 1-6 siffror">
+                        <small style="color: #666; font-size: 0.9em;">PLU-koden kan vara 1-6 siffror</small>
                     </div>
                     
                     <div class="form-group">

@@ -2956,13 +2956,36 @@ function startNewQuestion() {
             }
             
             if (pluInput) {
+                // Primär keypress validering - blockera alla icke-numeriska tecken
                 pluInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         checkAnswer();
+                        return;
+                    }
+                    
+                    // Tillåt endast siffror 0-9
+                    if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                        // Visuell feedback för ogiltig inmatning
+                        e.target.style.animation = 'shake 0.3s ease-in-out';
+                        setTimeout(() => {
+                            e.target.style.animation = '';
+                        }, 300);
+                        return;
+                    }
+                    
+                    // Blockera om redan 6 siffror
+                    if (e.target.value.length >= 6) {
+                        e.preventDefault();
+                        // Visuell feedback för maxlängd
+                        e.target.style.animation = 'shake 0.3s ease-in-out';
+                        setTimeout(() => {
+                            e.target.style.animation = '';
+                        }, 300);
                     }
                 });
                 
-                // Säkerställ att endast siffror accepteras
+                // Backup input-validering (för copy/paste och andra fall)
                 pluInput.addEventListener('input', function(e) {
                     // Ta bort icke-numeriska tecken
                     let value = e.target.value.replace(/[^0-9]/g, '');
@@ -2970,13 +2993,39 @@ function startNewQuestion() {
                     if (value.length > 6) {
                         value = value.substring(0, 6);
                     }
-                    e.target.value = value;
+                    // Sätt värdet om det ändrats
+                    if (e.target.value !== value) {
+                        e.target.value = value;
+                    }
+                    
+                    // Visuell feedback baserat på längd
+                    if (value.length === 0) {
+                        e.target.style.borderColor = '';
+                        e.target.style.backgroundColor = '';
+                    } else if (value.length >= 1 && value.length <= 6) {
+                        e.target.style.borderColor = '#28a745';
+                        e.target.style.backgroundColor = '#f8fff8';
+                    }
                 });
                 
-                // Förhindra vissa tangenter som kan orsaka problem
+                // Extra keydown-skydd för problematiska tangenter
                 pluInput.addEventListener('keydown', function(e) {
-                    // Förhindra minus, plus, e, E, punkt, komma
-                    if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E' || e.key === '.' || e.key === ',') {
+                    // Lista över alla förbjudna tangenter
+                    const forbiddenKeys = [
+                        '-', '+', 'e', 'E', '.', ',', ' ', 
+                        'a', 'b', 'c', 'd', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 
+                        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                        'A', 'B', 'C', 'D', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+                    ];
+                    
+                    // Tillåt navigerings- och kontrolltangenter
+                    const allowedKeys = [
+                        'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+                        'Home', 'End', 'Tab', 'Enter', 'Escape'
+                    ];
+                    
+                    if (forbiddenKeys.includes(e.key) || (e.key.length === 1 && !/[0-9]/.test(e.key))) {
                         e.preventDefault();
                     }
                 });
@@ -2987,6 +3036,23 @@ function startNewQuestion() {
                     let paste = (e.clipboardData || window.clipboardData).getData('text');
                     let numericOnly = paste.replace(/[^0-9]/g, '').substring(0, 6);
                     e.target.value = numericOnly;
+                    
+                    // Trigga input event för visuell feedback
+                    e.target.dispatchEvent(new Event('input'));
+                });
+                
+                // Fokus-hantering för bättre UX
+                pluInput.addEventListener('focus', function(e) {
+                    // Markera all text vid fokus för enkel redigering
+                    setTimeout(() => e.target.select(), 10);
+                });
+                
+                pluInput.addEventListener('blur', function(e) {
+                    // Återställ normal styling vid blur om inget värde
+                    if (e.target.value === '') {
+                        e.target.style.borderColor = '';
+                        e.target.style.backgroundColor = '';
+                    }
                 });
                 
                 // Enhance accessibility for input

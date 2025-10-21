@@ -288,24 +288,90 @@ input:disabled {
     margin: 8px 0;
 }
 
-/* Bilduppladdning för produkter */
-.image-upload-group {
+/* Bildväljare för produkter */
+.image-select-group {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 
-.image-upload-group input[type="text"] {
+.image-select-group input[type="text"] {
     flex: 1;
 }
 
-.image-upload-group .btn {
+.image-select-group .btn {
     flex-shrink: 0;
     white-space: nowrap;
 }
 
 .current-image-preview {
     margin-top: 8px;
+}
+
+/* GitHub Image Gallery Modal */
+.image-gallery-modal .modal-content {
+    max-width: 900px;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.image-gallery-modal .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.image-gallery-modal .image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.image-gallery-modal .image-item {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.image-gallery-modal .image-item:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.2);
+}
+
+.image-gallery-modal .image-item.selected {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.image-gallery-modal .image-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.image-gallery-modal .image-item:hover img {
+    transform: scale(1.05);
+}
+
+.image-gallery-modal .search-box input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.image-gallery-modal .search-box input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(0,123,255,0.2);
 }
 
 /* Enhanced Feedback Styling */

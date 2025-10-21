@@ -61,7 +61,10 @@ För e-post/lösenord-autentisering kan du anpassa e-postmallarna:
 4. Välj region: `europe-west3 (Frankfurt)` (närmast Sverige)
 5. Klicka "Done"
 
-### 3.2 Säkerställ regler (för produktion)
+### 3.2 Konfigurera Firestore-regler (viktigt!)
+1. Gå till "Firestore Database" → "Rules" i Firebase Console
+2. Ersätt standardreglerna med följande:
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -70,13 +73,89 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    
+    // Produkter - alla kan läsa, bara moderatorer/admins kan skriva
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && (
+        getUserRole(request.auth.uid) == 'admin' || 
+        getUserRole(request.auth.uid) == 'moderator'
+      );
+    }
+    
+    // Användarroller - bara admins kan hantera
+    match /userRoles/{userId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        getUserRole(request.auth.uid) == 'admin' ||
+        getUserRole(request.auth.uid) == 'moderator'
+      );
+      allow write: if request.auth != null && (
+        getUserRole(request.auth.uid) == 'admin'
+      );
+    }
+    
+    // Rolländringar - bara admins kan logga
+    match /roleChanges/{changeId} {
+      allow read: if request.auth != null && getUserRole(request.auth.uid) == 'admin';
+      allow write: if request.auth != null && getUserRole(request.auth.uid) == 'admin';
+    }
+    
+    // Helper-funktion för att hämta användarroll
+    function getUserRole(uid) {
+      return get(/databases/$(database)/documents/userRoles/$(uid)).data.role;
+    }
   }
 }
 ```
 
-## Steg 4: Hämta konfiguration
+## Steg 4: Konfigurera Firebase Storage
 
-### 4.1 Lägg till Webb-app
+### 4.1 Aktivera Storage
+1. Gå till "Storage" i Firebase Console-menyn
+2. Klicka "Get started"
+3. Välj "Start in test mode" (vi ändrar reglerna senare)
+4. **VIKTIGT - Välj gratis region för Storage:**
+   - **us-central1 (Iowa)** - REKOMMENDERAD för gratis Storage
+   - us-west2 (Los Angeles) 
+   - us-east1 (South Carolina)
+   - **UNDVIK europe-west3** - kostar pengar för Storage!
+5. Klicka "Done"
+
+**OBS:** Det är OK att ha Firestore i Europe och Storage i USA - prestandan påverkas inte märkbart för bilduppladdning.
+
+### 4.2 Konfigurera Storage-regler (viktigt för bilduppladdning!)
+1. I Storage-sektionen, gå till "Rules" fliken
+2. Ersätt standardreglerna med följande:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Produktbilder - alla kan läsa, bara moderatorer/admins kan ladda upp
+    match /product_images/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null && (
+        isUserRole('admin') || isUserRole('moderator')
+      );
+      allow delete: if request.auth != null && isUserRole('admin');
+    }
+    
+    // Helper-funktion för att kontrollera användarroll
+    function isUserRole(role) {
+      return firestore.get(/databases/(default)/documents/userRoles/$(request.auth.uid)).data.role == role;
+    }
+  }
+}
+```
+
+3. Klicka "Publish" för att spara reglerna
+
+**Viktigt**: Utan dessa regler kommer bilduppladdning inte att fungera!
+
+## Steg 5: Hämta konfiguration
+
+### 5.1 Lägg till Webb-app
 1. I Firebase Console, klicka på inställnings-ikonen ⚙️
 2. Välj "Project settings"
 3. Scrolla ner till "Your apps"
@@ -85,7 +164,7 @@ service cloud.firestore {
 6. **Hosting**: Kryssa INTE i denna (vi använder GitHub Pages)
 7. Klicka "Register app"
 
-### 4.2 Kopiera konfiguration
+### 5.2 Kopiera konfiguration
 Du får något liknande detta:
 ```javascript
 const firebaseConfig = {
@@ -98,9 +177,9 @@ const firebaseConfig = {
 };
 ```
 
-## Steg 5: Uppdatera din kod
+## Steg 6: Uppdatera din kod
 
-### 5.1 Ersätt konfiguration
+### 6.1 Ersätt konfiguration
 1. Öppna `firebase-config.js`
 2. Ersätt värdena i `firebaseConfig` objektet med dina egna värden från Firebase Console
 3. Ta bort kommentaren `// Du behöver ersätta värdena nedan...`
@@ -126,11 +205,11 @@ const firebaseConfig = {
 };
 ```
 
-## Steg 6: Testa lokalt (valfritt)
+## Steg 7: Testa lokalt (valfritt)
 
 Om du vill testa innan du laddar upp till GitHub Pages:
 
-### 6.1 Starta lokal server
+### 7.1 Starta lokal server
 ```bash
 # Med Python
 python -m http.server 8000
@@ -142,13 +221,13 @@ npx http-server -p 8000
 php -S localhost:8000
 ```
 
-### 6.2 Lägg till localhost i Firebase
+### 7.2 Lägg till localhost i Firebase
 1. Gå tillbaka till Firebase Console
 2. Authentication → Sign-in method
 3. Scrolla ner till "Authorized domains"
 4. Lägg till `localhost`
 
-## Steg 7: Ladda upp till GitHub Pages
+## Steg 8: Ladda upp till GitHub Pages
 
 1. Följ instruktionerna i `DEPLOY.md`
 2. Efter deployment, testa funktionaliteten:
@@ -192,6 +271,23 @@ När Firebase är konfigurerat får du:
 - Återställning vid dataförlust
 - Versionering av speldata
 
+### 📷 Bilduppladdning (Moderatorer/Admins)
+- Ladda upp egna produktbilder
+- Stöd för JPEG, PNG och WebP-format
+- Automatisk storlek- och typvalidering
+- Säker filhantering med Firebase Storage
+
+### 👨‍💼 Administrations- och Moderatorfunktioner
+- **Administratörer** kan:
+  - Lägga till/redigera/ta bort produkter
+  - Ladda upp och ta bort produktbilder
+  - Hantera användarroller (sätta moderatorer)
+  - Importera produktdata från JSON
+- **Moderatorer** kan:
+  - Lägga till/redigera produkter
+  - Ladda upp produktbilder
+  - Se produkthantering i spelgränssnittet
+
 ## Felsökning
 
 ### Problem: "Firebase inte konfigurerad"
@@ -214,6 +310,25 @@ När Firebase är konfigurerat får du:
 - Kontrollera JavaScript-konsolen för fel
 - Se till att användaren är inloggad
 - Verifiera att Firestore-data sparas korrekt
+
+### Problem: "Bilduppladdning fungerar inte"
+- **Kontrollera Firebase Storage-regler**: Se till att Storage-reglerna är korrekt konfigurerade (Steg 4.2)
+- **Användarroll**: Bara moderatorer och admins kan ladda upp bilder
+- **Filformat**: Endast JPEG, PNG och WebP tillåtna
+- **Filstorlek**: Max 5MB per bild
+- **Browser console**: Kolla efter felmeddelanden i Developer Tools
+
+### Problem: "Produkthantering syns inte"
+- Se till att användaren har moderator- eller admin-roll
+- Kontrollera Firestore-reglerna för userRoles-kollektionen
+- Logga ut och in igen för att uppdatera rollcache
+
+### Problem: "Storage kostar pengar" / "No-cost buckets not supported"
+- **Lösning**: Använd en gratis region för Storage
+- Gå till Firebase Console → Storage → Settings
+- Välj `us-central1`, `us-west2`, eller `us-east1`
+- Det är OK att ha Firestore i Europa och Storage i USA
+- **Alternativ**: Skapa nytt projekt med allt i `us-central1`
 
 ## Kostnader
 

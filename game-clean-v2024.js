@@ -4396,14 +4396,11 @@ function showProductDialog(product, index, title) {
                     
                     <div class="form-group">
                         <label for="productImage">Produktbild:</label>
-                        <div class="image-upload-group">
-                            <input type="text" id="productImage" name="image" value="${product?.image || ''}" placeholder="images/Placeholder.png" ${window.firebaseManager?.isModerator || window.firebaseManager?.isAdmin ? 'readonly' : ''}>
-                            <input type="file" id="imageFile" accept="image/*" style="display: none;">
-                            ${window.firebaseManager?.isModerator || window.firebaseManager?.isAdmin ? 
-                                '<button type="button" id="uploadImageBtn" class="btn btn-secondary btn-sm">📷 Ladda upp egen bild</button>' : 
-                                ''}
+                        <div class="image-select-group">
+                            <input type="text" id="productImage" name="image" value="${product?.image || ''}" placeholder="images/Placeholder.png" readonly>
+                            <button type="button" id="selectImageBtn" class="btn btn-secondary btn-sm">�️ Välj från GitHub</button>
                         </div>
-                        <small style="color: #666; font-size: 0.9em;">${window.firebaseManager?.isModerator || window.firebaseManager?.isAdmin ? 'Klicka på "Ladda upp egen bild" för att välja från din enhet' : 'Ange sökväg till bildfil (t.ex. images/apple.png)'}</small>
+                        <small style="color: #666; font-size: 0.9em;">Klicka på "Välj från GitHub" för att bläddra bland tillgängliga bilder</small>
                         ${product?.image && product.image !== 'images/Placeholder.png' ? 
                             `<div class="current-image-preview">
                                 <img src="${product.image}" alt="Aktuell bild" style="max-width: 100px; max-height: 100px; margin-top: 8px; border: 1px solid #ddd; border-radius: 4px;">
@@ -4535,59 +4532,35 @@ function showProductDialog(product, index, title) {
         });
     }
     
-    // Event listener för bilduppladdning
-    const uploadImageBtn = document.getElementById('uploadImageBtn');
-    const imageFileInput = document.getElementById('imageFile');
+    // Event listener för bildväljare
+    const selectImageBtn = document.getElementById('selectImageBtn');
     const productImageInput = document.getElementById('productImage');
     
-    if (uploadImageBtn && imageFileInput) {
-        uploadImageBtn.addEventListener('click', () => {
-            imageFileInput.click();
-        });
-        
-        imageFileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+    if (selectImageBtn && window.openImageGallery) {
+        selectImageBtn.addEventListener('click', () => {
+            const currentImageUrl = productImageInput.value;
             
-            // Visa loading state
-            uploadImageBtn.textContent = '⏳ Laddar upp...';
-            uploadImageBtn.disabled = true;
-            
-            try {
-                const productName = document.getElementById('productName').value || 'ny_produkt';
-                const imageUrl = await window.firebaseManager.uploadProductImage(file, productName);
+            window.openImageGallery(currentImageUrl, (selectedImage) => {
+                // Uppdatera input-fältet med den valda bildens URL
+                productImageInput.value = selectedImage.rawUrl;
                 
-                if (imageUrl) {
-                    // Uppdatera input-fältet med den nya URL:en
-                    productImageInput.value = imageUrl;
-                    
-                    // Visa preview av den nya bilden
-                    let previewContainer = modal.querySelector('.current-image-preview');
-                    if (!previewContainer) {
-                        previewContainer = document.createElement('div');
-                        previewContainer.className = 'current-image-preview';
-                        productImageInput.parentNode.appendChild(previewContainer);
-                    }
-                    
-                    previewContainer.innerHTML = `
-                        <img src="${imageUrl}" alt="Ny bild" style="max-width: 100px; max-height: 100px; margin-top: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    `;
-                    
-                    if (window.showToast) {
-                        window.showToast('Bild uppladdad!', 'success');
-                    }
+                // Uppdatera eller skapa preview
+                let previewContainer = modal.querySelector('.current-image-preview');
+                if (!previewContainer) {
+                    previewContainer = document.createElement('div');
+                    previewContainer.className = 'current-image-preview';
+                    productImageInput.parentNode.appendChild(previewContainer);
                 }
-            } catch (error) {
-                console.error('Fel vid bilduppladdning:', error);
+                
+                previewContainer.innerHTML = `
+                    <img src="${selectedImage.rawUrl}" alt="Vald bild" style="max-width: 100px; max-height: 100px; margin-top: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <div style="font-size: 0.8em; color: #666; margin-top: 4px;">${selectedImage.displayName}</div>
+                `;
+                
                 if (window.showToast) {
-                    window.showToast('Fel vid bilduppladdning', 'error');
+                    window.showToast(`Bild vald: ${selectedImage.displayName}`, 'success');
                 }
-            } finally {
-                // Återställ knapp
-                uploadImageBtn.textContent = '📷 Ladda upp egen bild';
-                uploadImageBtn.disabled = false;
-                imageFileInput.value = ''; // Rensa file input
-            }
+            });
         });
     }
 }
